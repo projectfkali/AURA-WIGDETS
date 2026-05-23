@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .glass-panel {
+    background: rgba(20, 20, 20, var(--panel-opacity, 0.4));
+    backdrop-filter: blur(var(--panel-blur, 24px));
+    -webkit-backdrop-filter: blur(var(--panel-blur, 24px));
+    border: var(--panel-border-width, 1px) solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--panel-radius, 32px);
+    font-family: var(--panel-font, inherit);
+    @apply shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] text-white transition-all duration-300 hover:shadow-[0_16px_48px_0_rgba(0,0,0,0.7)];
+  }
+}
