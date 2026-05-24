@@ -10,7 +10,9 @@ const colorMap = {
 
 export default function Dashboard() {
   const [config, setConfig] = useState({ widgets: [] })
-  const [activeMenu, setActiveMenu] = useState('gallery') // 'gallery', 'active', 'themes', 'settings'
+  const [activeMenu, setActiveMenu] = useState('gallery')
+  const [editingCustomId, setEditingCustomId] = useState(null)
+  const [customCode, setCustomCode] = useState("")
   const [editingId, setEditingId] = useState(null)
   const [activeTab, setActiveTab] = useState('basic')
   const fileInputRef = useRef(null)
@@ -57,6 +59,40 @@ export default function Dashboard() {
     })
     saveConfig(newConfig)
     setActiveMenu('active') // Ekleme sonrası aktif widgetlar sayfasına geç
+  }
+
+  const themes = [
+    { id: 'glass', name: 'Premium Glass', color: 'bg-white/10' },
+    { id: 'dark', name: 'Dark Mode', color: 'bg-black/60' },
+    { id: 'cyberpunk', name: 'Cyberpunk', color: 'bg-yellow-500/20', border: 'border-yellow-500' },
+    { id: 'neon', name: 'Neon Purple', color: 'bg-purple-900/40', border: 'border-purple-500' },
+    { id: 'os', name: 'Sistem Teması (OS)', color: 'bg-gradient-to-br from-blue-500/20 to-purple-500/20', border: 'border-white/30' }
+  ]
+
+  const handleThemeChange = async (themeId) => {
+    let globalAccent = null;
+    if (themeId === 'os' && window.electronAPI?.getWindowsAccent) {
+       globalAccent = await window.electronAPI.getWindowsAccent();
+    }
+    const newConfig = { ...config, theme: themeId }
+    newConfig.widgets = newConfig.widgets.map(w => {
+      let wSet = { ...w.settings };
+      if (themeId === 'glass') { wSet.bgOpacity = 10; wSet.blur = 16; wSet.borderColor = 'rgba(255,255,255,0.1)'; }
+      if (themeId === 'dark') { wSet.bgOpacity = 60; wSet.blur = 24; wSet.borderColor = 'rgba(0,0,0,0.5)'; }
+      if (themeId === 'cyberpunk') { wSet.bgOpacity = 20; wSet.blur = 4; wSet.borderColor = '#eab308'; }
+      if (themeId === 'neon') { wSet.bgOpacity = 40; wSet.blur = 30; wSet.borderColor = '#a855f7'; }
+      if (themeId === 'os') { 
+        wSet.bgOpacity = 30; wSet.blur = 20; 
+        if (globalAccent) {
+           wSet.borderColor = globalAccent;
+           wSet.textColor = globalAccent;
+        } else {
+           wSet.borderColor = 'rgba(255,255,255,0.3)';
+        }
+      }
+      return { ...w, settings: wSet }
+    });
+    saveConfig(newConfig)
   }
 
   const removeWidget = (id) => {
@@ -172,8 +208,19 @@ export default function Dashboard() {
         <nav className="flex-1 space-y-2">
           <MenuItem 
             id="gallery" 
-            label="Galeri & Mağaza" 
+            label="Yerleşik Galeri" 
             icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>} 
+          />
+          <MenuItem 
+            id="store" 
+            label="Aura Mağaza" 
+            badge="YENİ"
+            icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>} 
+          />
+          <MenuItem 
+            id="ai" 
+            label="Aura AI (Yapay Zeka)" 
+            icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>} 
           />
           <MenuItem 
             id="active" 
@@ -199,8 +246,8 @@ export default function Dashboard() {
         
         {activeMenu === 'gallery' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h2 className="text-3xl font-bold mb-2">Widget Galerisi</h2>
-            <p className="text-white/50 mb-8">İstediğiniz modülü tek tıkla masaüstünüze gönderin.</p>
+            <h2 className="text-3xl font-bold mb-2">Yerleşik Widget Galerisi</h2>
+            <p className="text-white/50 mb-8">Sisteme gömülü temel modülleri tek tıkla masaüstünüze gönderin.</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               <GalleryItem title="Akıllı (Smart) Widget" desc="Kodsuz veri ve metin oluşturucu" onClick={() => addWidget('smart')} highlight color="green" />
@@ -213,6 +260,126 @@ export default function Dashboard() {
               <GalleryItem title="Hava Durumu" desc="Anlık sıcaklık durumu" onClick={() => addWidget('weather')} />
               <GalleryItem title="Yapışkan Not" desc="Masaüstü not defteri" onClick={() => addWidget('notes')} />
               <GalleryItem title="Pomodoro" desc="Odaklanma zamanlayıcısı" onClick={() => addWidget('pomodoro')} />
+            </div>
+          </div>
+        )}
+
+        {activeMenu === 'store' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Aura Mağazası (Topluluk)</h2>
+                <p className="text-white/50">Diğer kullanıcılar tarafından kodlanmış gelişmiş modülleri (Blueprints) indirin.</p>
+              </div>
+              <div className="px-4 py-1.5 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-full text-sm font-medium">Beta V3.0</div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div className="bg-black/40 border border-white/5 hover:border-blue-500/30 transition-colors rounded-2xl overflow-hidden flex flex-col group">
+                <div className="h-32 bg-gradient-to-br from-green-900/40 to-black relative overflow-hidden flex items-center justify-center border-b border-white/5">
+                  <div className="text-green-500 font-mono text-xl opacity-50 tracking-widest">10101101</div>
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <h3 className="font-bold text-xl mb-1">Matrix Yağmuru</h3>
+                  <p className="text-sm text-white/50 mb-6">Masaüstünüze efsanevi Matrix yeşil kod yağmuru efekti ekleyen özel HTML Canvas eklentisi.</p>
+                  <button onClick={() => {
+                    const html = `<style>body{margin:0;overflow:hidden;background:#000}canvas{display:block}</style><canvas id="c"></canvas><script>const c=document.getElementById("c"),ctx=c.getContext("2d");c.width=window.innerWidth;c.height=window.innerHeight;const letters="0123456789ABCDEF".split("");const fontSize=16,columns=c.width/fontSize;const drops=[];for(let x=0;x<columns;x++)drops[x]=1;setInterval(()=>{ctx.fillStyle="rgba(0,0,0,0.05)";ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle="#0F0";ctx.font=fontSize+"px arial";for(let i=0;i<drops.length;i++){const text=letters[Math.floor(Math.random()*letters.length)];ctx.fillText(text,i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>c.height&&Math.random()>0.975)drops[i]=0;drops[i]++}},33);</script>`;
+                    const newConfig = { ...config };
+                    newConfig.widgets.push({
+                      id: `w_${Date.now()}`, type: 'custom', position: { x: 100, y: 100 },
+                      settings: { scale: 1.0, opacity: 0.2, blur: 0, radius: 16, htmlContent: html, width: 400, height: 600 }
+                    });
+                    saveConfig(newConfig);
+                    setActiveMenu('active');
+                  }} className="mt-auto w-full py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">İndir ve Ekle</button>
+                </div>
+              </div>
+
+              <div className="bg-black/40 border border-white/5 hover:border-purple-500/30 transition-colors rounded-2xl overflow-hidden flex flex-col group">
+                <div className="h-32 bg-gradient-to-br from-pink-900/40 to-purple-900/20 relative overflow-hidden flex items-center justify-center border-b border-white/5">
+                  <div className="text-pink-400 font-bold text-3xl blur-[1px]">10:42</div>
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <h3 className="font-bold text-xl mb-1">Cyber Neon Saat</h3>
+                  <p className="text-sm text-white/50 mb-6">Parıldayan neon efektlerine sahip, devasa boyutlu özel bir dijital saat görünümü.</p>
+                  <button onClick={() => {
+                    const html = `<style>@import url('https://fonts.googleapis.com/css2?family=Monoton&display=swap'); body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:transparent;color:#ff00ff;font-family:'Monoton',cursive;text-shadow:0 0 10px #ff00ff,0 0 20px #ff00ff,0 0 40px #ff00ff;} h1{font-size:5rem;margin:0;}</style><h1>23:59</h1><script>setInterval(()=>{const d=new Date();document.querySelector('h1').innerText=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')},1000)</script>`;
+                    const newConfig = { ...config };
+                    newConfig.widgets.push({
+                      id: `w_${Date.now()}`, type: 'custom', position: { x: 300, y: 200 },
+                      settings: { scale: 1.0, opacity: 0.1, blur: 0, radius: 0, htmlContent: html, width: 400, height: 200, borderWidth: 0 }
+                    });
+                    saveConfig(newConfig);
+                    setActiveMenu('active');
+                  }} className="mt-auto w-full py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">İndir ve Ekle</button>
+                </div>
+              </div>
+
+              <div className="bg-black/40 border border-white/5 hover:border-cyan-500/30 transition-colors rounded-2xl overflow-hidden flex flex-col group">
+                <div className="h-32 bg-gradient-to-br from-cyan-900/40 to-blue-900/20 relative overflow-hidden flex items-center justify-center border-b border-white/5">
+                  <div className="text-cyan-400 font-bold text-xl drop-shadow-[0_0_10px_rgba(34,211,238,1)] border-4 border-cyan-400 rounded-full w-16 h-16 flex items-center justify-center">TRON</div>
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <h3 className="font-bold text-xl mb-1">Tron Halkası</h3>
+                  <p className="text-sm text-white/50 mb-6">Fütüristik, parlayan ve iç içe dönen animasyonlu neon enerji halkaları.</p>
+                  <button onClick={() => {
+                    const html = `<style>body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:transparent;} .ring{width:150px;height:150px;border:5px solid transparent;border-top:5px solid #0ff;border-right:5px solid #0ff;border-radius:50%;animation:spin 2s linear infinite;box-shadow:0 0 20px #0ff, inset 0 0 20px #0ff; display:flex; align-items:center; justify-content:center;} .ring::after{content:'';position:absolute;width:120px;height:120px;border:5px solid transparent;border-bottom:5px solid #f0f;border-left:5px solid #f0f;border-radius:50%;animation:spin 1.5s linear infinite reverse;box-shadow:0 0 15px #f0f, inset 0 0 15px #f0f;} @keyframes spin{100%{transform:rotate(360deg);}}</style><div class="ring"></div>`;
+                    const newConfig = { ...config };
+                    newConfig.widgets.push({
+                      id: `w_${Date.now()}`, type: 'custom', position: { x: 400, y: 200 },
+                      settings: { scale: 1.0, opacity: 0.1, blur: 0, radius: 0, htmlContent: html, width: 220, height: 220, borderWidth: 0 }
+                    });
+                    saveConfig(newConfig);
+                    setActiveMenu('active');
+                  }} className="mt-auto w-full py-3 bg-cyan-500 text-black rounded-xl font-bold hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/20">İndir ve Ekle</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {activeMenu === 'ai' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-3xl">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">Aura AI Asistan</h2>
+                <p className="text-white/50">Masaüstünüzde yaşayan kişisel yapay zekanız ve kodsuz widget üreticiniz.</p>
+              </div>
+              <div className="px-4 py-1.5 bg-green-500/10 border border-green-500/20 text-green-400 rounded-full text-sm font-medium">Beta V3.0</div>
+            </div>
+
+            <div className="space-y-6">
+              {/* Masaüstü Asistanı */}
+              <div className="p-6 bg-white/5 border border-white/10 rounded-2xl flex flex-col md:flex-row gap-6 items-center">
+                <div className="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                  <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h3 className="text-xl font-bold mb-2">Masaüstü AI Asistanı</h3>
+                  <p className="text-white/50 text-sm mb-4">Size hava durumunu söyleyen, kod yazan ve sohbet eden şeffaf bir masaüstü arkadaşı edinin.</p>
+                  <button onClick={() => addWidget('ai')} className="px-6 py-2.5 bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">Masaüstüne Ekle</button>
+                </div>
+              </div>
+
+              {/* Prompt to Widget */}
+              <div className="p-6 bg-black/40 border border-green-500/20 rounded-2xl">
+                <h3 className="text-xl font-bold mb-2 text-green-400">Prompt-to-Widget Üretici</h3>
+                <p className="text-white/50 text-sm mb-6">İstediğiniz widget'ı hayal edin ve yazın. Aura AI sizin için kodlayıp ekrana koysun.</p>
+                
+                <div className="flex flex-col gap-3">
+                  <textarea 
+                    placeholder="Örnek: Bana kırmızı renkte, dev boyutlu ve gölgeli bir dijital saat widget'ı yap..."
+                    className="w-full h-24 bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white placeholder:text-white/30 focus:border-green-500 outline-none resize-none transition-colors"
+                  ></textarea>
+                  <button onClick={() => {
+                    alert("Aura AI Modeli yükleniyor... (API entegrasyonu tamamlandığında kod otomatik üretilecektir.)");
+                  }} className="py-3 bg-green-500 text-black font-bold rounded-xl hover:bg-green-400 transition-colors shadow-lg shadow-green-500/20">
+                    Sihri Gerçekleştir 🚀
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -288,9 +455,32 @@ export default function Dashboard() {
                          >
                            Görünüm (Cam Efekti)
                          </button>
+                         {w.type === 'custom' && (
+                           <button 
+                             className={`pb-3 text-sm font-medium transition-all border-b-2 ${activeTab === 'code' ? 'border-green-500 text-green-400' : 'border-transparent text-white/50 hover:text-white'}`}
+                             onClick={() => setActiveTab('code')}
+                           >
+                             Kod (Gelişmiş)
+                           </button>
+                         )}
                        </div>
 
                        <div className="p-6 bg-black/10">
+                         {/* === KOD AYARLARI (SADECE CUSTOM) === */}
+                         {activeTab === 'code' && w.type === 'custom' && (
+                           <div className="space-y-4">
+                             <div>
+                               <label className="block text-xs font-semibold text-white/50 uppercase mb-3">Özel HTML / CSS Kodları</label>
+                               <textarea
+                                 className="w-full h-48 bg-black/40 border border-green-500/30 rounded-xl p-4 text-sm font-mono text-green-400 focus:border-green-500 outline-none"
+                                 value={w.settings.htmlContent || ""}
+                                 onChange={(e) => updateWidgetSettings(w.id, 'htmlContent', e.target.value)}
+                               ></textarea>
+                               <p className="text-xs text-white/40 mt-2">İpucu: Neon renklerini değiştirmek için CSS içindeki HEX kodlarını (örn: #0ff) düzenleyebilirsiniz.</p>
+                             </div>
+                           </div>
+                         )}
+
                          {/* === TEMEL AYARLAR === */}
                          {activeTab === 'basic' && (
                             <div className="space-y-6 max-w-2xl">

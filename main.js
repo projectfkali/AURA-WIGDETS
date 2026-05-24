@@ -1,8 +1,9 @@
-import { app, BrowserWindow, ipcMain, screen, Tray, Menu, nativeImage } from 'electron';
+import { app, BrowserWindow, screen, ipcMain, Tray, Menu, globalShortcut, nativeImage } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import os from 'os';
+import { exec } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -119,8 +120,20 @@ function createTray() {
 
 app.whenReady().then(() => {
   createWidgetWindow();
-  createDashboardWindow(); // Dashboard'u hemen aç
+  createDashboardWindow();
   createTray();
+  
+  let isExposed = false;
+  globalShortcut.register('CommandOrControl+Space', () => {
+    if (widgetWindow && !widgetWindow.isDestroyed()) {
+      isExposed = !isExposed;
+      widgetWindow.setAlwaysOnTop(isExposed, 'screen-saver');
+      if (isExposed) {
+        widgetWindow.focus();
+      }
+      widgetWindow.webContents.send('expose-toggled', isExposed);
+    }
+  });
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWidgetWindow();
@@ -143,10 +156,36 @@ ipcMain.handle('save-config', (event, config) => {
 });
 
 ipcMain.handle('media-control', (event, action) => {
-  const { exec } = require('child_process');
   const scriptPath = path.join(__dirname, 'media-keys.ps1');
   exec(`powershell -ExecutionPolicy Bypass -File "${scriptPath}" -action ${action}`);
   return true;
+});
+
+ipcMain.handle('get-media-info', async () => {
+  return new Promise((resolve) => {
+    const scriptPath = path.join(__dirname, 'get-media-info.ps1');
+    exec(`powershell -ExecutionPolicy Bypass -File "${scriptPath}"`, (error, stdout) => {
+      try {
+        if (stdout) {
+           const json = JSON.parse(stdout.trim());
+           resolve(json);
+        } else resolve(null);
+      } catch(e) { resolve(null); }
+    });
+  });
+});
+
+ipcMain.handle('get-windows-accent', async () => {
+  return new Promise((resolve) => {
+    exec('powershell -Command "(Get-ItemProperty -Path HKCU:\\SOFTWARE\\Microsoft\\Windows\\DWM).ColorizationColor"', (error, stdout) => {
+      if (error || !stdout) return resolve(null);
+      const dec = parseInt(stdout.trim(), 10);
+      if (isNaN(dec)) return resolve(null);
+      // Convert ABGR to RGB Hex
+      let hex = (dec & 0x00FFFFFF).toString(16).padStart(6, '0');
+      resolve('#' + hex);
+    });
+  });
 });
 
 ipcMain.on('set-ignore-mouse-events', (event, ignore) => {

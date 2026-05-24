@@ -10,5 +10,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('config-updated', listener);
     return () => ipcRenderer.removeListener('config-updated', listener);
   },
-  mediaControl: (action) => ipcRenderer.invoke('media-control', action)
+  mediaControl: (action) => ipcRenderer.invoke('media-control', action),
+  getMediaInfo: () => ipcRenderer.invoke('get-media-info'),
+  getWindowsAccent: () => ipcRenderer.invoke('get-windows-accent'),
+  onExposeToggled: (callback) => {
+    const listener = (event, isExposed) => callback(isExposed);
+    ipcRenderer.on('expose-toggled', listener);
+    return () => ipcRenderer.removeListener('expose-toggled', listener);
+  }
 });

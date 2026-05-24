@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const colorMap = {
   white: 'text-white',
@@ -17,79 +17,93 @@ export default function MediaWidget({ settings }) {
     if (window.electronAPI) window.electronAPI.mediaControl('playpause')
   }
 
-  const nextTrack = () => {
-    setIsPlaying(true)
-    if (window.electronAPI) window.electronAPI.mediaControl('next')
-  }
-  
-  const prevTrack = () => {
-    setIsPlaying(true)
-    if (window.electronAPI) window.electronAPI.mediaControl('prev')
-  }
+  const [trackInfo, setTrackInfo] = useState({ title: 'Sistem Sesi', artist: 'Windows' })
 
-  const openPlayer = () => {
-    if (window.electronAPI) window.electronAPI.mediaControl('open-spotify')
+  useEffect(() => {
+    let interval;
+    if (window.electronAPI?.getMediaInfo) {
+      interval = setInterval(async () => {
+        const info = await window.electronAPI.getMediaInfo();
+        if (info && info.Track) {
+           let parts = info.Track.split(' - ');
+           if (parts.length > 1) {
+             setTrackInfo({ artist: parts[0].trim(), title: parts.slice(1).join(' - ').trim() });
+           } else {
+             setTrackInfo({ title: info.Track, artist: info.Status === 'Playing' ? 'Spotify' : 'Windows' });
+           }
+           setIsPlaying(info.Status === 'Playing');
+        }
+      }, 2000);
+    }
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleAction = (action) => {
+    if (window.electronAPI) {
+      window.electronAPI.mediaControl(action)
+      if (action === 'play_pause') setIsPlaying(!isPlaying)
+    }
   }
 
   return (
-    <div className="glass-panel p-4 w-[280px] flex items-center gap-4 group">
+    <div className="glass-panel w-72 flex flex-col overflow-hidden group">
       
-      {/* Cover Art - Click to open Spotify */}
+      {/* Album Art Area (Click to launch) */}
       <div 
-        onClick={openPlayer}
-        title="Spotify'ı Aç"
-        className="w-16 h-16 rounded-lg bg-black/40 overflow-hidden flex-shrink-0 relative cursor-pointer shadow-[0_8px_16px_rgba(0,0,0,0.6)]"
+        className="h-32 bg-gradient-to-br from-pink-500/20 to-purple-600/20 relative overflow-hidden flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity drag-handle"
+        onClick={() => handleAction('launch')}
       >
-        <img 
-          src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=200&h=200" 
-          alt="Album Cover" 
-          className={`w-full h-full object-cover transition-transform duration-700 ${isPlaying ? 'scale-110' : 'scale-100'}`}
-        />
-        <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
-           <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.563.387-.857.207-2.35-1.434-5.305-1.76-8.786-.963-.335.077-.67-.133-.746-.47-.077-.334.132-.67.47-.745 3.808-.87 7.076-.496 9.712 1.115.293.18.386.563.207.856zm1.2-3.15c-.225.367-.704.482-1.072.257-2.687-1.652-6.785-2.13-9.965-1.166-.413.127-.854-.108-.98-.52-.126-.413.108-.854.52-.98 3.65-1.11 8.28-.584 11.34 1.305.368.226.482.705.257 1.072zm.105-3.32c-3.21-1.905-8.5-2.08-11.56-1.15-.49.15-.99-.13-1.14-.62-.15-.49.13-.99.62-1.14 3.53-1.07 9.38-.86 13.06 1.33.44.26.58.83.32 1.27-.26.44-.83.58-1.3.31z"/></svg>
-        </div>
-      </div>
-
-      {/* Info & Controls */}
-      <div className="flex-1 flex flex-col justify-center">
-        <div className="mb-2">
-          <h4 className="font-bold text-sm leading-tight truncate w-[160px]">Aktif Medya</h4>
-          <p className="text-[11px] text-white/50 truncate w-[160px]">Sistem Ses Çıkışı</p>
+        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors pointer-events-none"></div>
+        <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/20 shadow-xl pointer-events-none">
+          <svg className="w-8 h-8 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+          </svg>
         </div>
         
-        <div className={`flex items-center gap-3 ${theme}`}>
-          <button onClick={prevTrack} className="hover:scale-110 transition-transform opacity-70 hover:opacity-100 focus:outline-none">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"></path></svg>
+        {/* Animated equalizer waves when playing */}
+        {isPlaying && (
+          <div className="absolute bottom-3 right-3 flex gap-1 items-end h-4 pointer-events-none">
+            <div className="w-1 bg-green-400 rounded-t animate-bounce" style={{animationDuration: '0.7s'}}></div>
+            <div className="w-1 bg-green-400 rounded-t animate-bounce" style={{animationDuration: '0.5s'}}></div>
+            <div className="w-1 bg-green-400 rounded-t animate-bounce" style={{animationDuration: '0.9s'}}></div>
+          </div>
+        )}
+      </div>
+
+      {/* Info & Controls Area */}
+      <div className="p-4 bg-black/20 backdrop-blur-lg border-t border-white/5">
+        <div className="mb-4">
+          <h3 className="font-bold text-white text-lg truncate drop-shadow-md">{trackInfo.title}</h3>
+          <p className="text-white/60 text-sm truncate">{trackInfo.artist}</p>
+        </div>
+
+        <div className="flex items-center justify-between px-2">
+          <button 
+            onClick={() => handleAction('prev')}
+            className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" /></svg>
           </button>
           
-          <button onClick={togglePlay} className="hover:scale-110 transition-transform bg-white/10 p-1.5 rounded-full focus:outline-none">
+          <button 
+            onClick={() => handleAction('play_pause')}
+            className="w-12 h-12 flex items-center justify-center bg-white text-black rounded-full hover:scale-105 hover:bg-gray-200 transition-all shadow-lg"
+          >
             {isPlaying ? (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
+               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
             ) : (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+               <svg className="w-6 h-6 translate-x-0.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
             )}
           </button>
           
-          <button onClick={nextTrack} className="hover:scale-110 transition-transform opacity-70 hover:opacity-100 focus:outline-none">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6v12l8.5-6L8 6zm8 0h2v12h-2z"></path></svg>
+          <button 
+            onClick={() => handleAction('next')}
+            className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M11.555 14.832A1 1 0 0013 14v-2.798l5.445 3.63A1 1 0 0020 14V6a1 1 0 00-1.555-.832L13 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4zM4.555 14.832A1 1 0 006 14v-2.798l5.445 3.63A1 1 0 0013 14V6a1 1 0 00-1.555-.832L6 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" /></svg>
           </button>
         </div>
       </div>
-
-      {/* Visualizer bars */}
-      <div className="absolute top-4 right-4 flex gap-0.5 items-end h-3">
-        {[1,2,3].map(i => (
-          <div 
-            key={i} 
-            className={`w-1 rounded-t-sm ${theme.replace('text-', 'bg-')}`} 
-            style={{ 
-              height: isPlaying ? `${Math.random() * 80 + 20}%` : '15%',
-              transition: 'height 0.2s ease'
-            }}
-          ></div>
-        ))}
-      </div>
-
     </div>
   )
 }
