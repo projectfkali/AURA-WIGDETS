@@ -49,7 +49,7 @@ export default function SmartWidget({ settings }) {
 
   // Görünüm (Type'a göre render)
   return (
-    <div className={`${settings.isTransparent ? '' : 'glass-panel'} p-6 flex items-center justify-center min-w-[150px] min-h-[100px]`}>
+    <div className="w-full h-full flex items-center justify-center">
       
       {type === 'text' && (
         <div className="text-xl font-medium tracking-wide text-center">

@@ -8,30 +8,41 @@ const coinMeta = {
 }
 
 const colorMap = {
-  white: 'text-white',
-  blue: 'text-blue-400',
-  green: 'text-green-400',
-  purple: 'text-purple-400',
-  red: 'text-red-400'
+  white: { stroke: '#ffffff', drop: 'drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' },
+  blue: { stroke: '#60a5fa', drop: 'drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]' },
+  green: { stroke: '#4ade80', drop: 'drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]' },
+  purple: { stroke: '#c084fc', drop: 'drop-shadow-[0_0_8px_rgba(192,132,252,0.5)]' },
+  red: { stroke: '#f87171', drop: 'drop-shadow-[0_0_8px_rgba(248,113,113,0.5)]' }
 }
 
 export default function CryptoWidget({ settings }) {
-  const [data, setData] = useState({ price: 0, change: 0, loading: true })
+  const [data, setData] = useState({ price: 0, change: 0, history: [], loading: true })
   const coinId = settings.coin || 'solana'
   const meta = coinMeta[coinId] || coinMeta.solana
-  const iconColor = colorMap[settings.color || 'white']
+  const theme = colorMap[settings.color || 'white']
 
   useEffect(() => {
     setData(prev => ({ ...prev, loading: true }))
     
     const fetchCrypto = async () => {
       try {
-        const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true`)
-        const json = await res.json()
-        if (json[coinId]) {
+        // Hem anlık fiyat hem de son 24 saatlik grafik verisi
+        const [priceRes, chartRes] = await Promise.all([
+          fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true`),
+          fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1`)
+        ])
+        
+        const priceJson = await priceRes.json()
+        const chartJson = await chartRes.json()
+
+        if (priceJson[coinId] && chartJson.prices) {
+          // Çok fazla nokta varsa seyrelt (Örn: her 6 noktadan biri)
+          const history = chartJson.prices.filter((_, i) => i % 6 === 0).map(p => p[1])
+          
           setData({
-            price: json[coinId].usd,
-            change: json[coinId].usd_24h_change,
+            price: priceJson[coinId].usd,
+            change: priceJson[coinId].usd_24h_change,
+            history,
             loading: false
           })
         }
@@ -45,48 +56,86 @@ export default function CryptoWidget({ settings }) {
     return () => clearInterval(interval)
   }, [coinId])
 
+  const openCoinMarketCap = () => {
+    if (window.electronAPI) {
+      window.electronAPI.openExternal(`https://coinmarketcap.com/currencies/${coinId}/`)
+    }
+  }
+
   if (data.loading) {
     return (
-      <div className={`${settings.isTransparent ? '' : 'glass-panel'} p-5 w-[220px] flex items-center justify-center min-h-[100px]`}>
-        <div className={`w-5 h-5 border-2 border-t-transparent ${iconColor.replace('text-', 'border-')} rounded-full animate-spin`}></div>
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
       </div>
     )
   }
 
   const isPositive = data.change >= 0
+  const trendColor = isPositive ? 'text-green-400' : 'text-red-400'
+  const trendStroke = isPositive ? '#4ade80' : '#f87171'
+
+  let points = ""
+  if (data.history.length > 0) {
+    const min = Math.min(...data.history)
+    const max = Math.max(...data.history)
+    const range = max - min || 1
+    points = data.history.map((p, i) => {
+      const x = (i / (data.history.length - 1)) * 100
+      const y = 100 - (((p - min) / range) * 80 + 10) // %10 padding alt/üst
+      return `${x},${y}`
+    }).join(' ')
+  }
 
   return (
-    <div className={`${settings.isTransparent ? '' : 'glass-panel'} p-5 w-[220px]`}>
-      <div 
-        className="flex items-center gap-3 mb-3 cursor-pointer group"
-        onClick={() => {
-          const url = `https://coinmarketcap.com/currencies/${meta.name.toLowerCase()}/`;
-          if (window.electronAPI && window.electronAPI.openExternal) {
-            window.electronAPI.openExternal(url);
-          }
-        }}
-      >
-        <div className={`w-10 h-10 rounded-full bg-white/5 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] ${iconColor}`}>
-          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-            <path d={meta.icon}/>
+    <div className="w-full h-full flex flex-col justify-between p-2">
+      <div className="flex justify-between items-start cursor-pointer hover:opacity-80 transition-opacity" onClick={openCoinMarketCap}>
+        <div className="flex items-center gap-3 z-10">
+          <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md shadow-inner border border-white/10">
+            <svg className={`w-6 h-6 ${theme.drop}`} fill={theme.stroke} viewBox="0 0 24 24"><path d={meta.icon} /></svg>
+          </div>
+          <div>
+            <h3 className="font-bold text-white text-lg tracking-tight leading-tight">{meta.name}</h3>
+            <p className="text-white/50 text-[10px] font-bold tracking-widest uppercase">{meta.symbol} / USD</p>
+          </div>
+        </div>
+        <div className="text-right z-10">
+          <div className="font-black text-xl text-white tracking-tighter">
+            ${data.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+          </div>
+          <div className={`text-xs font-bold flex items-center justify-end gap-1 ${trendColor}`}>
+            {isPositive ? '▲' : '▼'} {Math.abs(data.change).toFixed(2)}%
+          </div>
+        </div>
+      </div>
+
+      {/* Background SVG Chart (Aura Style) */}
+      {data.history.length > 0 && (
+        <div className="absolute inset-0 top-14 opacity-40 pointer-events-none">
+          <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
+            <polyline 
+              points={points}
+              fill="none"
+              stroke={trendStroke}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]"
+              style={{ filter: `drop-shadow(0px 0px 8px ${trendStroke})` }}
+            />
+            <polygon 
+              points={`0,100 ${points} 100,100`}
+              fill={`url(#grad_${coinId})`}
+              className="opacity-20"
+            />
+            <defs>
+              <linearGradient id={`grad_${coinId}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={trendStroke} stopOpacity="1"/>
+                <stop offset="100%" stopColor={trendStroke} stopOpacity="0"/>
+              </linearGradient>
+            </defs>
           </svg>
         </div>
-        <div className="group-hover:text-blue-400 transition-colors">
-          <div className="font-bold text-lg leading-tight flex items-center gap-1">
-            {meta.name}
-            <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-          </div>
-          <div className="text-xs text-white/50 uppercase tracking-wider">{meta.symbol}/USD</div>
-        </div>
-      </div>
-      
-      <div className="flex items-end justify-between mt-4">
-        <div className="text-2xl font-bold tracking-tight">${data.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}</div>
-        <div className={`flex items-center gap-1 text-sm font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-          <svg className={`w-3 h-3 ${!isPositive && 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-          {Math.abs(data.change).toFixed(2)}%
-        </div>
-      </div>
+      )}
     </div>
   )
 }

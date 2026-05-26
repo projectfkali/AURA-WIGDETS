@@ -46,7 +46,7 @@ export default function MediaWidget({ settings }) {
   }
 
   return (
-    <div className="glass-panel w-72 flex flex-col overflow-hidden group">
+    <div className="w-full h-full flex flex-col overflow-hidden group">
       
       {/* Album Art Area (Click to launch) */}
       <div 

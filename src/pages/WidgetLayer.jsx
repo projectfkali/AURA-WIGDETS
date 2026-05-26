@@ -12,6 +12,13 @@ import HardwareWidget from '../widgets/HardwareWidget'
 import MediaWidget from '../widgets/MediaWidget'
 import AiWidget from '../widgets/AiWidget'
 import ThreeDWidget from '../widgets/ThreeDWidget'
+import StockWidget from '../widgets/StockWidget'
+import GithubWidget from '../widgets/GithubWidget'
+import CalendarWidget from '../widgets/CalendarWidget'
+import NewsWidget from '../widgets/NewsWidget'
+import ShortcutsWidget from '../widgets/ShortcutsWidget'
+import CountdownWidget from '../widgets/CountdownWidget'
+import WorldClockWidget from '../widgets/WorldClockWidget'
 
 const widgetMap = {
   clock: ClockWidget,
@@ -25,7 +32,14 @@ const widgetMap = {
   hardware: HardwareWidget,
   media: MediaWidget,
   ai: AiWidget,
-  threed: ThreeDWidget
+  threed: ThreeDWidget,
+  stock: StockWidget,
+  github: GithubWidget,
+  calendar: CalendarWidget,
+  news: NewsWidget,
+  shortcuts: ShortcutsWidget,
+  countdown: CountdownWidget,
+  worldclock: WorldClockWidget
 }
 
 export default function WidgetLayer() {
@@ -168,15 +182,19 @@ function DraggableWidget({ widget, children, updatePosition, isExposed, appConte
   }
   
   const style = {
-    backgroundColor: isTransparent ? 'transparent' : `rgba(0, 0, 0, ${settings.opacity ?? 0.4})`,
+    backgroundColor: isTransparent ? 'transparent' : `color-mix(in srgb, ${settings.bgColorHex || '#000000'} ${Math.round((settings.opacity ?? 0.4) * 100)}%, transparent)`,
     backdropFilter: isTransparent ? 'none' : `blur(${settings.blur ?? 24}px)`,
     borderWidth: isTransparent ? '0px' : `${settings.borderWidth ?? 1}px`,
     borderColor: isTransparent ? 'transparent' : contextBorder,
     borderRadius: isTransparent ? '0px' : `${settings.radius ?? 32}px`,
+    width: settings.width ? `${settings.width}px` : 'auto',
+    height: settings.height ? `${settings.height}px` : 'auto',
+    padding: isTransparent ? '0px' : (settings.padding !== undefined ? `${settings.padding}px` : '24px'),
     fontFamily: settings.fontFamily || 'inherit',
     position: 'absolute',
     top: 0,
-    left: 0
+    left: 0,
+    overflow: 'hidden'
   }
 
   return (

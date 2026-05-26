@@ -247,12 +247,28 @@ ipcMain.handle('get-sys-stats', () => {
     idle += core.times.idle;
   });
   
+  const uptime = os.uptime();
+  const netInterfaces = os.networkInterfaces();
+  let activeNet = false;
+  // Basitçe aktif bir bağlantı olup olmadığını kontrol et
+  for (const name of Object.keys(netInterfaces)) {
+    for (const net of netInterfaces[name]) {
+      if (!net.internal && net.mac !== '00:00:00:00:00:00') {
+        activeNet = true;
+        break;
+      }
+    }
+  }
+
   return {
     memUsage,
     usedMem: (usedMem / 1024 / 1024 / 1024).toFixed(2),
     totalMem: (totalMem / 1024 / 1024 / 1024).toFixed(2),
     cpuIdle: idle,
-    cpuTotal: total
+    cpuTotal: total,
+    uptime,
+    activeNet,
+    cpuModel: cpus[0].model.replace('(R)', '').replace('(TM)', '').trim()
   };
 });
 

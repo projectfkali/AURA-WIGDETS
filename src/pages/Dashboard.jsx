@@ -89,10 +89,57 @@ export default function Dashboard() {
 
   const addWidget = (type) => {
     const newConfig = { ...config }
-    const defaultSettings = { scale: 1.0, opacity: 0.4, blur: 24, radius: 32, borderWidth: 1, fontFamily: 'inherit', color: 'white' }
+    const defaultSettings = { scale: 1.0, opacity: 0.4, blur: 24, radius: 32, borderWidth: 1, padding: 24, bgColorHex: '#000000', fontFamily: 'inherit', color: 'white' }
     
-    if (type === 'clock') defaultSettings.format = '24h'
-    if (type === 'crypto') defaultSettings.coin = 'solana'
+    if (type === 'clock') {
+      defaultSettings.format = '24h'
+      defaultSettings.width = 300
+      defaultSettings.height = 160
+    }
+    if (type === 'crypto') {
+      defaultSettings.coin = 'solana'
+      defaultSettings.width = 240
+      defaultSettings.height = 140
+    }
+    if (type === 'weather') {
+      defaultSettings.width = 200
+      defaultSettings.height = 160
+    }
+    if (type === 'sysmon') {
+      defaultSettings.width = 300
+      defaultSettings.height = 180
+    }
+    if (type === 'stock') {
+      defaultSettings.width = 280
+      defaultSettings.height = 200
+      defaultSettings.stockSymbol = 'AAPL'
+      defaultSettings.basePrice = 175.50
+    }
+    if (type === 'github') {
+      defaultSettings.width = 320
+      defaultSettings.height = 140
+    }
+    if (type === 'calendar') {
+      defaultSettings.width = 240
+      defaultSettings.height = 240
+    }
+    if (type === 'news') {
+      defaultSettings.width = 300
+      defaultSettings.height = 160
+    }
+    if (type === 'shortcuts') {
+      defaultSettings.width = 300
+      defaultSettings.height = 100
+      defaultSettings.isTransparent = true
+    }
+    if (type === 'countdown') {
+      defaultSettings.width = 280
+      defaultSettings.height = 140
+    }
+    if (type === 'worldclock') {
+      defaultSettings.width = 220
+      defaultSettings.height = 180
+    }
     if (type === 'custom') {
       defaultSettings.htmlContent = `<style>\nbody { color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }\nh1 { text-shadow: 0 2px 4px rgba(0,0,0,0.5); }\n</style>\n<h1>Kendi Widget'ım</h1>`
       defaultSettings.width = 300
@@ -247,14 +294,17 @@ export default function Dashboard() {
   )
 
   return (
-    <div className="min-h-screen flex selection:bg-blue-500/30">
-      
-      {/* Sidebar */}
-      <aside className="w-72 bg-[#111] border-r border-white/5 flex flex-col p-6 sticky top-0 h-screen">
-        <div className="mb-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg>
-          </div>
+    <div className="flex h-screen overflow-hidden text-white font-sans bg-[#0a0a0a] selection:bg-white/30 relative">
+      {/* Mesh Gradient Arkaplan */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 blur-[120px] rounded-full mix-blend-screen animate-pulse"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-purple-500/20 blur-[150px] rounded-full mix-blend-screen animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      {/* Floating Sidebar */}
+      <aside className="w-72 bg-white/[0.02] border border-white/5 m-6 rounded-3xl p-6 flex flex-col backdrop-blur-3xl shadow-[0_0_40px_rgba(0,0,0,0.5)] z-10">
+        <div className="flex items-center gap-4 mb-10">
+          <div className="w-12 h-12 bg-gradient-to-br from-white to-white/50 text-black font-black flex items-center justify-center rounded-2xl shadow-lg">A</div>
           <div>
             <h1 className="font-bold text-lg tracking-tight">Widget Engine</h1>
             <p className="text-[10px] text-white/40 uppercase tracking-widest">Dashboard V2</p>
@@ -298,25 +348,30 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-10 max-w-5xl overflow-y-auto">
+      <main className="flex-1 p-6 md:p-10 max-w-6xl overflow-y-auto z-10">
         
         {activeMenu === 'gallery' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h2 className="text-3xl font-bold mb-2">Yerleşik Widget Galerisi</h2>
-            <p className="text-white/50 mb-8">Sisteme gömülü temel modülleri tek tıkla masaüstünüze gönderin.</p>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 mt-6">
+            <h2 className="text-4xl font-bold mb-2 tracking-tight">Widget Galerisi</h2>
+            <p className="text-white/50 mb-10 text-lg">Masaüstünüzü kişiselleştirmek için modülleri seçin.</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              <GalleryItem title="Akıllı (Smart) Widget" desc="Kodsuz veri ve metin oluşturucu" onClick={() => addWidget('smart')} highlight color="green" />
-              <GalleryItem title="Özel Kod (Custom)" desc="HTML/CSS/JS yazın" onClick={() => addWidget('custom')} highlight color="blue" />
-              <GalleryItem title="Medya Oynatıcı" desc="Spotify / Sistem Sesi" onClick={() => addWidget('media')} highlight color="purple" />
-              <GalleryItem title="Ağ ve Batarya" desc="PC donanım izleyici" onClick={() => addWidget('hardware')} />
-              <GalleryItem title="Saat" desc="Modern dijital saat" onClick={() => addWidget('clock')} />
-              <GalleryItem title="Sistem Monitörü" desc="CPU & RAM durumu" onClick={() => addWidget('sysmon')} />
-              <GalleryItem title="Crypto Tracker" desc="Canlı Kripto fiyatları" onClick={() => addWidget('crypto')} />
-              <GalleryItem title="Hava Durumu" desc="Anlık sıcaklık durumu" onClick={() => addWidget('weather')} />
-              <GalleryItem title="Yapışkan Not" desc="Masaüstü not defteri" onClick={() => addWidget('notes')} />
-              <GalleryItem title="Pomodoro" desc="Odaklanma zamanlayıcısı" onClick={() => addWidget('pomodoro')} />
-              <GalleryItem title="Aura Core (3D)" desc="WebGL destekli 3 boyutlu reaktör" onClick={() => addWidget('threed')} highlight color="red" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-[200px]">
+              <GalleryBento title="Borsa Grafiği" desc="Canlı Hisse" onClick={() => addWidget('stock')} colSpan="md:col-span-2 lg:col-span-2" color="from-teal-500/20 to-green-500/5" icon="📈" />
+              <GalleryBento title="GitHub Heatmap" desc="Commit Haritası" onClick={() => addWidget('github')} colSpan="md:col-span-2 lg:col-span-2" color="from-emerald-500/20 to-teal-500/5" icon="🐙" />
+              <GalleryBento title="Haberler / RSS" desc="Son Dakika Akışı" onClick={() => addWidget('news')} colSpan="md:col-span-1 lg:col-span-2" color="from-red-500/20 to-orange-500/5" icon="📰" />
+              <GalleryBento title="Minimal Takvim" desc="Aylık Ajanda" onClick={() => addWidget('calendar')} colSpan="md:col-span-1 lg:col-span-1" color="from-blue-500/20 to-cyan-500/5" icon="📅" />
+              <GalleryBento title="Masaüstü Dock" desc="Kısayollar" onClick={() => addWidget('shortcuts')} colSpan="md:col-span-2 lg:col-span-1" color="from-purple-500/20 to-pink-500/5" icon="🚀" />
+              <GalleryBento title="Geri Sayım" desc="Sayaç" onClick={() => addWidget('countdown')} colSpan="md:col-span-1 lg:col-span-1" color="from-yellow-500/20 to-amber-500/5" icon="⏳" />
+              <GalleryBento title="Dünya Saatleri" desc="Çoklu Bölge" onClick={() => addWidget('worldclock')} colSpan="md:col-span-1 lg:col-span-1" color="from-indigo-500/20 to-purple-500/5" icon="🌍" />
+              
+              <GalleryBento title="Akıllı Modül" desc="Veri/AI odaklı" onClick={() => addWidget('smart')} colSpan="md:col-span-1 lg:col-span-1" color="from-green-500/20 to-emerald-500/5" icon="✨" />
+              <GalleryBento title="Özel Kod" desc="HTML/CSS/JS" onClick={() => addWidget('custom')} colSpan="md:col-span-1 lg:col-span-1" color="from-blue-500/20 to-indigo-500/5" icon="👨‍💻" />
+              <GalleryBento title="Medya" desc="Spotify Player" onClick={() => addWidget('media')} colSpan="md:col-span-1 lg:col-span-1" color="from-pink-500/20 to-purple-500/5" icon="🎵" />
+              <GalleryBento title="3D Core" desc="Aura WebGL" onClick={() => addWidget('threed')} colSpan="md:col-span-2 lg:col-span-1" color="from-orange-500/20 to-red-500/5" icon="🧊" />
+              <GalleryBento title="Sistem" desc="CPU/RAM" onClick={() => addWidget('sysmon')} colSpan="1" color="from-zinc-500/20 to-zinc-800/5" icon="💻" />
+              <GalleryBento title="Saat" desc="Zaman" onClick={() => addWidget('clock')} colSpan="1" color="from-zinc-500/20 to-zinc-800/5" icon="⏰" />
+              <GalleryBento title="Hava Durumu" desc="Sıcaklık" onClick={() => addWidget('weather')} colSpan="1" color="from-zinc-500/20 to-zinc-800/5" icon="🌤️" />
+              <GalleryBento title="Kripto" desc="Market" onClick={() => addWidget('crypto')} colSpan="1" color="from-zinc-500/20 to-zinc-800/5" icon="🪙" />
             </div>
           </div>
         )}
@@ -529,6 +584,218 @@ export default function Dashboard() {
                                 </div>
                               )}
 
+                              {w.type === 'crypto' && (
+                                <div>
+                                  <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Kripto Para Birimi</label>
+                                  <select value={w.settings?.coin || 'solana'} onChange={(e) => updateSetting(w.id, 'coin', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-blue-500 transition-colors">
+                                    <option value="bitcoin">Bitcoin (BTC)</option>
+                                    <option value="ethereum">Ethereum (ETH)</option>
+                                    <option value="solana">Solana (SOL)</option>
+                                    <option value="dogecoin">Dogecoin (DOGE)</option>
+                                  </select>
+                                </div>
+                              )}
+
+                              {w.type === 'weather' && (
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="col-span-2">
+                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Şehir / Konum (Örn: Istanbul)</label>
+                                    <select 
+                                      value={`${w.settings?.lat || '41.0082'},${w.settings?.lon || '28.9784'}`} 
+                                      onChange={(e) => {
+                                        const [lat, lon] = e.target.value.split(',')
+                                        updateSetting(w.id, 'lat', lat)
+                                        updateSetting(w.id, 'lon', lon)
+                                      }} 
+                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-blue-500 transition-colors"
+                                    >
+                                      <option value="41.0082,28.9784">İstanbul</option>
+                                      <option value="39.9208,32.8541">Ankara</option>
+                                      <option value="38.4237,27.1428">İzmir</option>
+                                      <option value="40.7128,-74.0060">New York</option>
+                                      <option value="51.5074,-0.1278">Londra</option>
+                                      <option value="35.6762,139.6503">Tokyo</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              )}
+
+                              {w.type === 'github' && (
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">GitHub Kullanıcı Adı</label>
+                                    <input 
+                                      type="text" 
+                                      value={w.settings?.githubUser || ''} 
+                                      onChange={e => updateSetting(w.id, 'githubUser', e.target.value)} 
+                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-emerald-500 transition-colors" 
+                                      placeholder="torvalds" 
+                                    />
+                                    <p className="text-xs text-white/30 mt-2">Commit haritasını görmek istediğiniz GitHub kullanıcı adını girin.</p>
+                                  </div>
+                                </div>
+                              )}
+
+                              {w.type === 'news' && (
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Haber Kategorisi</label>
+                                    <select 
+                                      value={w.settings?.newsCategory || 'technology'} 
+                                      onChange={(e) => updateSetting(w.id, 'newsCategory', e.target.value)} 
+                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-red-500 transition-colors"
+                                    >
+                                      <option value="technology">🖥️ Teknoloji</option>
+                                      <option value="world">🌍 Dünya</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Haber Geçiş Hızı</label>
+                                    <select 
+                                      value={w.settings?.scrollSpeed || 8000} 
+                                      onChange={(e) => updateSetting(w.id, 'scrollSpeed', parseInt(e.target.value))} 
+                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-red-500 transition-colors"
+                                    >
+                                      <option value="5000">5 Saniye (Hızlı)</option>
+                                      <option value="8000">8 Saniye (Normal)</option>
+                                      <option value="15000">15 Saniye (Yavaş)</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              )}
+
+                              {w.type === 'countdown' && (
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Etkinlik Adı</label>
+                                    <input 
+                                      type="text" 
+                                      value={w.settings?.countdownTitle || ''} 
+                                      onChange={e => updateSetting(w.id, 'countdownTitle', e.target.value)} 
+                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-yellow-500 transition-colors" 
+                                      placeholder="Yeni Yıl" 
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Hedef Tarih</label>
+                                    <input 
+                                      type="datetime-local" 
+                                      value={w.settings?.targetDate || ''} 
+                                      onChange={e => updateSetting(w.id, 'targetDate', e.target.value)} 
+                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-yellow-500 transition-colors text-white [color-scheme:dark]" 
+                                    />
+                                    <p className="text-xs text-white/30 mt-2">Geri sayım yapılacak tarihi ve saati seçin.</p>
+                                  </div>
+                                </div>
+                              )}
+
+                              {w.type === 'worldclock' && (
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Şehir Seti</label>
+                                    <select 
+                                      value={w.settings?.citySet || 'default'} 
+                                      onChange={(e) => {
+                                        const sets = {
+                                          default: [
+                                            { name: 'NEW YORK', tz: 'America/New_York' },
+                                            { name: 'LONDRA', tz: 'Europe/London' },
+                                            { name: 'TOKYO', tz: 'Asia/Tokyo' }
+                                          ],
+                                          europe: [
+                                            { name: 'İSTANBUL', tz: 'Europe/Istanbul' },
+                                            { name: 'BERLİN', tz: 'Europe/Berlin' },
+                                            { name: 'PARİS', tz: 'Europe/Paris' }
+                                          ],
+                                          asia: [
+                                            { name: 'TOKYO', tz: 'Asia/Tokyo' },
+                                            { name: 'SEUL', tz: 'Asia/Seoul' },
+                                            { name: 'SİNGAPUR', tz: 'Asia/Singapore' }
+                                          ],
+                                          americas: [
+                                            { name: 'NEW YORK', tz: 'America/New_York' },
+                                            { name: 'LOS ANGELES', tz: 'America/Los_Angeles' },
+                                            { name: 'SAO PAULO', tz: 'America/Sao_Paulo' }
+                                          ]
+                                        }
+                                        updateSetting(w.id, 'citySet', e.target.value)
+                                        updateSetting(w.id, 'cities', sets[e.target.value])
+                                      }} 
+                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-indigo-500 transition-colors"
+                                    >
+                                      <option value="default">🌎 Küresel (NY, Londra, Tokyo)</option>
+                                      <option value="europe">🇪🇺 Avrupa (İstanbul, Berlin, Paris)</option>
+                                      <option value="asia">🌏 Asya (Tokyo, Seul, Singapur)</option>
+                                      <option value="americas">🌎 Amerikalar (NY, LA, Sao Paulo)</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              )}
+
+                              {w.type === 'shortcuts' && (
+                                <div className="space-y-3">
+                                  <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Hızlı Kısayollar</label>
+                                  <p className="text-xs text-white/30 mb-3">Masaüstünüzde tek tıkla açılacak web sitelerini düzenleyin.</p>
+                                  {(w.settings?.customShortcuts || [
+                                    { name: 'Google', url: 'https://google.com', icon: 'G' },
+                                    { name: 'YouTube', url: 'https://youtube.com', icon: 'Y' },
+                                    { name: 'GitHub', url: 'https://github.com', icon: 'GH' },
+                                    { name: 'ChatGPT', url: 'https://chat.openai.com', icon: 'AI' }
+                                  ]).map((sc, idx) => (
+                                    <div key={idx} className="grid grid-cols-[60px_1fr_1fr] gap-2">
+                                      <input 
+                                        type="text" 
+                                        value={sc.icon} 
+                                        onChange={e => {
+                                          const arr = [...(w.settings?.customShortcuts || [
+                                            { name: 'Google', url: 'https://google.com', icon: 'G' },
+                                            { name: 'YouTube', url: 'https://youtube.com', icon: 'Y' },
+                                            { name: 'GitHub', url: 'https://github.com', icon: 'GH' },
+                                            { name: 'ChatGPT', url: 'https://chat.openai.com', icon: 'AI' }
+                                          ])]
+                                          arr[idx] = { ...arr[idx], icon: e.target.value }
+                                          updateSetting(w.id, 'customShortcuts', arr)
+                                        }} 
+                                        className="bg-black/40 border border-white/10 rounded-lg p-2 text-xs text-center outline-none focus:border-purple-500" 
+                                        placeholder="İkon"
+                                      />
+                                      <input 
+                                        type="text" 
+                                        value={sc.name} 
+                                        onChange={e => {
+                                          const arr = [...(w.settings?.customShortcuts || [
+                                            { name: 'Google', url: 'https://google.com', icon: 'G' },
+                                            { name: 'YouTube', url: 'https://youtube.com', icon: 'Y' },
+                                            { name: 'GitHub', url: 'https://github.com', icon: 'GH' },
+                                            { name: 'ChatGPT', url: 'https://chat.openai.com', icon: 'AI' }
+                                          ])]
+                                          arr[idx] = { ...arr[idx], name: e.target.value }
+                                          updateSetting(w.id, 'customShortcuts', arr)
+                                        }} 
+                                        className="bg-black/40 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" 
+                                        placeholder="İsim"
+                                      />
+                                      <input 
+                                        type="text" 
+                                        value={sc.url} 
+                                        onChange={e => {
+                                          const arr = [...(w.settings?.customShortcuts || [
+                                            { name: 'Google', url: 'https://google.com', icon: 'G' },
+                                            { name: 'YouTube', url: 'https://youtube.com', icon: 'Y' },
+                                            { name: 'GitHub', url: 'https://github.com', icon: 'GH' },
+                                            { name: 'ChatGPT', url: 'https://chat.openai.com', icon: 'AI' }
+                                          ])]
+                                          arr[idx] = { ...arr[idx], url: e.target.value }
+                                          updateSetting(w.id, 'customShortcuts', arr)
+                                        }} 
+                                        className="bg-black/40 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" 
+                                        placeholder="https://..."
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
                               {w.type === 'smart' && (
                                 <div className="space-y-5">
                                   <div>
@@ -581,38 +848,60 @@ export default function Dashboard() {
                          {/* === GÖRÜNÜM AYARLARI === */}
                          {activeTab === 'appearance' && (
                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl">
-                              <div className="md:col-span-2 p-5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl flex items-center justify-between">
+                              <div className="md:col-span-2 p-5 bg-black/20 border border-white/5 rounded-2xl flex items-center justify-between backdrop-blur-xl">
                                   <div>
                                     <h4 className="font-bold text-white text-lg">Şeffaf Mod (Ultimate Freedom)</h4>
                                     <p className="text-white/50 text-sm">Arka planı, cam efektini ve çerçeveyi tamamen kapatır. Masaüstünüzde sadece yazı veya objeler kalır.</p>
                                   </div>
                                   <button 
                                     onClick={() => updateSetting(w.id, 'isTransparent', !w.settings?.isTransparent)}
-                                    className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${w.settings?.isTransparent ? 'bg-blue-500' : 'bg-white/20'}`}
+                                    className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${w.settings?.isTransparent ? 'bg-blue-500' : 'bg-white/10'}`}
                                   >
-                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${w.settings?.isTransparent ? 'translate-x-8' : 'translate-x-1'}`} />
+                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm ${w.settings?.isTransparent ? 'translate-x-8' : 'translate-x-1'}`} />
                                   </button>
                                </div>
                               
                               <div className={`space-y-6 transition-opacity ${w.settings?.isTransparent ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
                                 <div>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Büyüklük (Scale)</span><span className="text-blue-400">{w.settings?.scale || 1.0}x</span></div>
-                                  <input type="range" min="0.5" max="3.0" step="0.1" value={w.settings?.scale || 1.0} onChange={(e) => updateSetting(w.id, 'scale', parseFloat(e.target.value))} className="w-full accent-blue-500" />
+                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Büyüklük (Scale)</span><span className="text-white">{w.settings?.scale || 1.0}x</span></div>
+                                  <input type="range" min="0.5" max="3.0" step="0.1" value={w.settings?.scale || 1.0} onChange={(e) => updateSetting(w.id, 'scale', parseFloat(e.target.value))} className="w-full accent-white" />
                                 </div>
                                 <div>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Arkaplan Koyuluğu (Opacity)</span><span className="text-blue-400">{Math.round((w.settings?.opacity ?? 0.4) * 100)}%</span></div>
-                                  <input type="range" min="0.0" max="1.0" step="0.05" value={w.settings?.opacity ?? 0.4} onChange={(e) => updateSetting(w.id, 'opacity', parseFloat(e.target.value))} className="w-full accent-blue-500" />
+                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Arkaplan Koyuluğu (Opacity)</span><span className="text-white">{Math.round((w.settings?.opacity ?? 0.4) * 100)}%</span></div>
+                                  <input type="range" min="0.0" max="1.0" step="0.05" value={w.settings?.opacity ?? 0.4} onChange={(e) => updateSetting(w.id, 'opacity', parseFloat(e.target.value))} className="w-full accent-white" />
+                                </div>
+                                <div>
+                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Özel Arkaplan Rengi</span><span className="text-white">{w.settings?.bgColorHex || '#000000'}</span></div>
+                                  <div className="flex gap-4 items-center">
+                                    <input type="color" value={w.settings?.bgColorHex || '#000000'} onChange={(e) => updateSetting(w.id, 'bgColorHex', e.target.value)} className="w-10 h-10 rounded-xl cursor-pointer bg-transparent border-0" />
+                                    <span className="text-sm text-white/50">Widget'ın temel arka plan rengini değiştirir.</span>
+                                  </div>
                                 </div>
                               </div>
 
-                              <div className="space-y-6">
+                              <div className={`space-y-6 transition-opacity ${w.settings?.isTransparent ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
                                 <div>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Bulanıklık (Blur)</span><span className="text-purple-400">{w.settings?.blur ?? 24}px</span></div>
-                                  <input type="range" min="0" max="50" step="1" value={w.settings?.blur ?? 24} onChange={(e) => updateSetting(w.id, 'blur', parseInt(e.target.value))} className="w-full accent-purple-500" />
+                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Bulanıklık (Blur)</span><span className="text-white">{w.settings?.blur ?? 24}px</span></div>
+                                  <input type="range" min="0" max="50" step="1" value={w.settings?.blur ?? 24} onChange={(e) => updateSetting(w.id, 'blur', parseInt(e.target.value))} className="w-full accent-white" />
                                 </div>
                                 <div>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Köşe Yuvarlaklığı (Radius)</span><span className="text-purple-400">{w.settings?.radius ?? 32}px</span></div>
-                                  <input type="range" min="0" max="100" step="2" value={w.settings?.radius ?? 32} onChange={(e) => updateSetting(w.id, 'radius', parseInt(e.target.value))} className="w-full accent-purple-500" />
+                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Köşe Yuvarlaklığı (Radius)</span><span className="text-white">{w.settings?.radius ?? 32}px</span></div>
+                                  <input type="range" min="0" max="100" step="2" value={w.settings?.radius ?? 32} onChange={(e) => updateSetting(w.id, 'radius', parseInt(e.target.value))} className="w-full accent-white" />
+                                </div>
+                              </div>
+                              
+                              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-white/5">
+                                <div>
+                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Genişlik (Width)</span><span className="text-white">{w.settings?.width || 300}px</span></div>
+                                  <input type="range" min="100" max="1200" step="10" value={w.settings?.width || 300} onChange={(e) => updateSetting(w.id, 'width', parseInt(e.target.value))} className="w-full accent-blue-500" />
+                                </div>
+                                <div>
+                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Yükseklik (Height)</span><span className="text-white">{w.settings?.height || 200}px</span></div>
+                                  <input type="range" min="100" max="1200" step="10" value={w.settings?.height || 200} onChange={(e) => updateSetting(w.id, 'height', parseInt(e.target.value))} className="w-full accent-blue-500" />
+                                </div>
+                                <div className={`transition-opacity ${w.settings?.isTransparent ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
+                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>İç Boşluk (Padding)</span><span className="text-white">{w.settings?.padding ?? 24}px</span></div>
+                                  <input type="range" min="0" max="100" step="2" value={w.settings?.padding ?? 24} onChange={(e) => updateSetting(w.id, 'padding', parseInt(e.target.value))} className="w-full accent-green-500" />
                                 </div>
                               </div>
 
@@ -698,32 +987,27 @@ export default function Dashboard() {
   )
 }
 
-function GalleryItem({ title, desc, onClick, highlight, color = 'blue' }) {
-  const bgColors = {
-    blue: 'bg-blue-500/5 border-blue-500/20 hover:border-blue-500/50 hover:bg-blue-500/10 text-blue-400',
-    green: 'bg-green-500/5 border-green-500/20 hover:border-green-500/50 hover:bg-green-500/10 text-green-400',
-    purple: 'bg-purple-500/5 border-purple-500/20 hover:border-purple-500/50 hover:bg-purple-500/10 text-purple-400'
-  }
-  const btnColors = {
-    blue: 'bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/40',
-    green: 'bg-green-500/20 text-green-400 group-hover:bg-green-500/40',
-    purple: 'bg-purple-500/20 text-purple-400 group-hover:bg-purple-500/40'
-  }
-  
-  const isHigh = highlight ? true : false
-  const wrapperClass = isHigh ? bgColors[color] : 'bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10 text-white'
-  const btnClass = isHigh ? btnColors[color] : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'
-
+function GalleryBento({ title, desc, onClick, colSpan = 'col-span-1', color, icon }) {
   return (
-    <div className={`flex flex-col gap-3 p-5 rounded-2xl border transition-all duration-300 cursor-pointer group ${wrapperClass}`} onClick={onClick}>
-      <div>
-        <div className="font-bold text-lg mb-1">{title}</div>
-        <div className="text-xs opacity-70 leading-relaxed">{desc}</div>
+    <div 
+      onClick={onClick}
+      className={`${colSpan} group relative overflow-hidden rounded-3xl bg-gradient-to-br ${color} border border-white/10 p-6 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:border-white/20`}
+    >
+      <div className="absolute top-0 right-0 p-6 opacity-20 text-6xl group-hover:scale-110 transition-transform duration-500">
+        {icon}
       </div>
-      <div className="mt-auto pt-2">
-         <button className={`w-full py-2.5 rounded-xl text-sm font-bold transition-colors ${btnClass}`}>
-           Masaüstüne Ekle
-         </button>
+      <div className="relative h-full flex flex-col justify-between z-10">
+        <div>
+          <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-inner">
+            {icon}
+          </div>
+          <h3 className="text-2xl font-bold tracking-tight text-white mb-1">{title}</h3>
+          <p className="text-white/50 font-medium">{desc}</p>
+        </div>
+        <div className="mt-4 flex items-center gap-2 text-sm font-bold text-white opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+          <span>Masaüstüne Ekle</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+        </div>
       </div>
     </div>
   )

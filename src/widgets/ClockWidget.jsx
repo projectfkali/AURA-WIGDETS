@@ -31,8 +31,8 @@ export default function ClockWidget({ settings }) {
   const colorClass = colorStyles[settings.color || 'white']
 
   return (
-    <div className={`${settings.isTransparent ? '' : 'glass-panel'} p-6 flex flex-col items-center justify-center min-w-[250px]`}>
-      <div className={`text-6xl font-mono font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br drop-shadow-md flex items-baseline ${colorClass}`}>
+    <div className="w-full h-full flex flex-col items-center justify-center">
+      <div className={`text-[3.5rem] md:text-6xl font-mono font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br drop-shadow-md flex items-baseline ${colorClass}`}>
         {hours}<span className="text-white/30 mx-1">:</span>{minutes}
         {is12h && <span className="text-xl ml-2 font-bold opacity-80">{ampm}</span>}
       </div>

@@ -1,11 +1,11 @@
 {
   "widgets": [
     {
-      "id": "w_1779826061961",
-      "type": "hardware",
+      "id": "w_1779830470685",
+      "type": "shortcuts",
       "position": {
-        "x": 1280,
-        "y": 200
+        "x": 680,
+        "y": 720
       },
       "settings": {
         "scale": 1,
@@ -13,79 +13,13 @@
         "blur": 24,
         "radius": 32,
         "borderWidth": 1,
-        "fontFamily": "inherit",
-        "color": "white"
-      }
-    },
-    {
-      "id": "w_1779826069990",
-      "type": "clock",
-      "position": {
-        "x": 1280,
-        "y": 0
-      },
-      "settings": {
-        "scale": 1,
-        "opacity": 0.4,
-        "blur": 24,
-        "radius": 32,
-        "borderWidth": 1,
+        "padding": 24,
+        "bgColorHex": "#000000",
         "fontFamily": "inherit",
         "color": "white",
-        "format": "24h",
-        "isTransparent": false
-      }
-    },
-    {
-      "id": "w_1779826077207",
-      "type": "crypto",
-      "position": {
-        "x": 820,
-        "y": 240
-      },
-      "settings": {
-        "scale": 1,
-        "opacity": 0.4,
-        "blur": 24,
-        "radius": 32,
-        "borderWidth": 1,
-        "fontFamily": "inherit",
-        "color": "white",
-        "coin": "solana"
-      }
-    },
-    {
-      "id": "w_1779827820820",
-      "type": "threed",
-      "position": {
-        "x": 300,
-        "y": 200
-      },
-      "settings": {
-        "scale": 1,
-        "opacity": 0.4,
-        "blur": 24,
-        "radius": 32,
-        "borderWidth": 1,
-        "fontFamily": "inherit",
-        "color": "white"
-      }
-    },
-    {
-      "id": "w_1779828702666",
-      "type": "hardware",
-      "position": {
-        "x": 780,
-        "y": 420
-      },
-      "settings": {
-        "scale": 1,
-        "opacity": 0.4,
-        "blur": 24,
-        "radius": 32,
-        "borderWidth": 1,
-        "fontFamily": "inherit",
-        "color": "white"
+        "width": 300,
+        "height": 100,
+        "isTransparent": true
       }
     }
   ]
