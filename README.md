@@ -6,7 +6,7 @@ Aura Widgets is a **frameless, transparent, and modular** desktop widget engine 
 
 <br>
 
-> ⚠️ **Bu proje aktif olarak geliştirilme aşamasındadır.** Birçok özellik henüz tamamlanmamış olup, bilinen çok sayıda bug ve eksiklik bulunmaktadır. Kararlı (stable) bir sürüm değildir; kendi sorumluluğunuzda kullanınız.
+> ⚠️ **This project is under active development.** Many features are incomplete and there are numerous known bugs and missing functionality. This is NOT a stable release — use at your own risk.
 
 <br>
 
@@ -19,33 +19,33 @@ Aura Widgets is a **frameless, transparent, and modular** desktop widget engine 
 <br><br>
 </div>
 
-## 🚧 Geliştirme Durumu & Bilinen Sorunlar
+## 🚧 Development Status & Known Issues
 
-> **Bu proje hâlâ erken geliştirme (Early Development) aşamasındadır.**  
-> Aşağıdaki listede bilinen başlıca eksiklikler ve hatalar yer almaktadır.
+> **This project is still in early development.**  
+> Below is a list of the major known bugs and missing features.
 
-### Bilinen Bug'lar 🐛
-- Bazı widget'lar eklendiğinde varsayılan boyutlandırma düzgün çalışmayabilir; boyutu manuel ayarlamak gerekebilir.
-- GitHub Heatmap widget'ı şu an simüle edilmiş (mock) veri kullanmaktadır; gerçek GitHub API entegrasyonu henüz tamamlanmamıştır.
-- Haber (News) widget'ı şu an sabit (hardcoded) demo haberleri göstermektedir; gerçek RSS/API entegrasyonu yapılmamıştır.
-- Sistem Monitörü (SysMon) CPU okumalarında ilk birkaç saniye yanlış değerler gösterebilir.
-- Şeffaf mod (Transparent Mode) bazı Windows sürümlerinde beklenen gibi çalışmayabilir.
-- Widget sürükle-bırak işlemi nadiren takılabilir veya pozisyon kaydetmeyebilir.
-- Masaüstü Dock (Shortcuts) widget'ında kısayol düzenleme değişiklikleri anında yansımayabilir.
-- 3D Aura Core widget'ı düşük donanımlı sistemlerde performans sorunlarına yol açabilir.
+### Known Bugs 🐛
+- Some widgets may not size correctly when first added; manual resizing from settings may be required.
+- GitHub Heatmap widget currently uses simulated (mock) data; real GitHub API integration is not yet implemented.
+- News widget currently displays hardcoded demo headlines; real RSS/API integration is not yet implemented.
+- SysMon CPU readings may show incorrect values for the first few seconds after launch.
+- Transparent Mode may not work as expected on certain Windows versions or GPU configurations.
+- Widget drag & drop can occasionally freeze or fail to save position.
+- Shortcuts Dock widget edits from the settings panel may not reflect immediately.
+- 3D Aura Core widget may cause performance issues on low-end hardware.
 
-### Eksik Özellikler 📋
-- Gerçek GitHub API entegrasyonu (GraphQL contributions query)
-- Gerçek RSS/Haber kaynağı entegrasyonu (NewsAPI, RSS-to-JSON)
-- Hava durumu widget'ında serbest şehir arama (şu an sabit 6 şehir)
-- Kripto widget'ında daha fazla coin desteği (şu an 4 coin)
-- Dünya Saatleri'nde kullanıcının kendi özel şehirlerini ekleyebilmesi
-- Geri Sayım widget'ında birden fazla sayaç desteği
-- Widget boyut ve pozisyon kilidleme (lock) özelliği
-- Çoklu masaüstü profili desteği (ev, iş, oyun)
-- Widget animasyon/geçiş efekti özelleştirmesi
-- Otomatik güncelleme (auto-update) mekanizması
-- Linux ve macOS desteği (şu an yalnızca Windows)
+### Missing Features 📋
+- Real GitHub API integration (GraphQL contributions query)
+- Real RSS / News source integration (NewsAPI, RSS-to-JSON proxy)
+- Free-text city search in the Weather widget (currently limited to 6 preset cities)
+- More cryptocurrency support in the Crypto widget (currently 4 coins)
+- Custom city input for World Clock (currently preset city sets only)
+- Multiple countdown timers in a single widget
+- Widget size & position locking
+- Multiple desktop profiles (home, work, gaming)
+- Widget animation / transition customization
+- Auto-update mechanism
+- Linux and macOS support (currently Windows only)
 
 ---
 
@@ -143,9 +143,9 @@ npm start
 
 ---
 
-## 🤝 Katkıda Bulunma
+## 🤝 Contributing
 
-Bu proje aktif geliştirme aşamasındadır ve katkılara açıktır. Hata bildirimi, özellik önerisi veya pull request göndermekten çekinmeyin.
+This project is under active development and open to contributions. Feel free to submit bug reports, feature requests, or pull requests.
 
 ---
 
