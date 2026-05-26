@@ -47,7 +47,7 @@ export default function CryptoWidget({ settings }) {
 
   if (data.loading) {
     return (
-      <div className="glass-panel p-5 w-[220px] flex items-center justify-center min-h-[100px]">
+      <div className={`${settings.isTransparent ? '' : 'glass-panel'} p-5 w-[220px] flex items-center justify-center min-h-[100px]`}>
         <div className={`w-5 h-5 border-2 border-t-transparent ${iconColor.replace('text-', 'border-')} rounded-full animate-spin`}></div>
       </div>
     )
@@ -56,15 +56,26 @@ export default function CryptoWidget({ settings }) {
   const isPositive = data.change >= 0
 
   return (
-    <div className="glass-panel p-5 w-[220px]">
-      <div className="flex items-center gap-3 mb-3">
-        <div className={`w-10 h-10 rounded-full bg-white/5 flex items-center justify-center ${iconColor}`}>
+    <div className={`${settings.isTransparent ? '' : 'glass-panel'} p-5 w-[220px]`}>
+      <div 
+        className="flex items-center gap-3 mb-3 cursor-pointer group"
+        onClick={() => {
+          const url = `https://coinmarketcap.com/currencies/${meta.name.toLowerCase()}/`;
+          if (window.electronAPI && window.electronAPI.openExternal) {
+            window.electronAPI.openExternal(url);
+          }
+        }}
+      >
+        <div className={`w-10 h-10 rounded-full bg-white/5 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] ${iconColor}`}>
           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
             <path d={meta.icon}/>
           </svg>
         </div>
-        <div>
-          <div className="font-bold text-lg leading-tight">{meta.name}</div>
+        <div className="group-hover:text-blue-400 transition-colors">
+          <div className="font-bold text-lg leading-tight flex items-center gap-1">
+            {meta.name}
+            <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          </div>
           <div className="text-xs text-white/50 uppercase tracking-wider">{meta.symbol}/USD</div>
         </div>
       </div>

@@ -1,0 +1,3 @@
+git add .
+git commit -m "feat(v5.0): Ultimate Freedom & Live Cloud Store" -m "- feat(store): Implemented live community store fetching from JSONBlob API" -m "- feat(publish): Added feature to upload Custom widgets globally" -m "- feat(ui): 'Ultimate Freedom' Transparent Mode for minimalist text-only UI" -m "- feat(ipc): Added external link routing (CoinMarketCap integration)" -m "- feat(context): Integrated Windows active window tracker for Gaming/Dev modes" -m "- feat(3d): Added Three.js WebGL rendering for borderless 3D Aura Core" -m "- fix(drag): Fixed Framer Motion layout conflicts with magnetic grid snapping"
+git push origin main

@@ -53,14 +53,14 @@ export default function WeatherWidget({ settings }) {
 
   if (data.loading) {
     return (
-      <div className="glass-panel p-5 w-[200px] flex items-center justify-center min-h-[100px]">
+      <div className={`${settings.isTransparent ? '' : 'glass-panel'} p-5 w-[200px] flex items-center justify-center min-h-[100px]`}>
         <div className={`w-5 h-5 border-2 border-t-transparent ${iconColor.replace('text-', 'border-')} rounded-full animate-spin`}></div>
       </div>
     )
   }
 
   return (
-    <div className="glass-panel p-5 w-[200px] flex flex-col items-center justify-center">
+    <div className={`${settings.isTransparent ? '' : 'glass-panel'} p-5 w-[200px] flex flex-col items-center justify-center`}>
       <div className="text-4xl mb-2">{getWeatherIcon(data.wmoCode)}</div>
       <div className={`text-3xl font-bold tracking-tight ${iconColor}`}>
         {data.temp}°C

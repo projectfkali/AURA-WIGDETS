@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, ipcMain, Tray, Menu, globalShortcut, nativeImage } from 'electron';
+import { app, BrowserWindow, screen, ipcMain, Tray, Menu, globalShortcut, nativeImage, shell } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -45,7 +45,8 @@ function createWidgetWindow() {
     height,
     frame: false,
     transparent: true,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
+    type: 'desktop', // Windows masaüstü seviyesinde kalması için
     skipTaskbar: true,
     hasShadow: false,
     resizable: false,
@@ -135,6 +136,38 @@ app.whenReady().then(() => {
     }
   });
 
+  let currentContext = 'normal';
+  
+  setInterval(() => {
+    const psScript = path.join(__dirname, 'get-active-window.ps1');
+    exec(`powershell -ExecutionPolicy Bypass -NoProfile -File "${psScript}"`, (error, stdout) => {
+      if (error) return;
+      try {
+        const info = JSON.parse(stdout);
+        const processName = info.ProcessName.toLowerCase();
+        const title = info.Title.toLowerCase();
+        
+        let newContext = 'normal';
+        
+        const games = ['valorant', 'league of legends', 'csgo', 'dota2', 'steam', 'epicgameslauncher', 'cyberpunk', 'eldenring'];
+        const devTools = ['code', 'devenv', 'idea64', 'windowsterminal', 'powershell', 'cmd', 'postman'];
+        
+        if (games.some(g => processName.includes(g) || title.includes(g))) {
+          newContext = 'gaming';
+        } else if (devTools.some(d => processName.includes(d) || title.includes(d))) {
+          newContext = 'developer';
+        }
+
+        if (newContext !== currentContext) {
+          currentContext = newContext;
+          if (widgetWindow && !widgetWindow.isDestroyed()) {
+             widgetWindow.webContents.send('context-changed', currentContext);
+          }
+        }
+      } catch (e) {}
+    });
+  }, 3000);
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWidgetWindow();
   });
@@ -221,4 +254,8 @@ ipcMain.handle('get-sys-stats', () => {
     cpuIdle: idle,
     cpuTotal: total
   };
+});
+
+ipcMain.on('open-external', (event, url) => {
+  shell.openExternal(url);
 });

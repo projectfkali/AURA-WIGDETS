@@ -15,6 +15,8 @@ export default function Dashboard() {
   const [customCode, setCustomCode] = useState("")
   const [editingId, setEditingId] = useState(null)
   const [activeTab, setActiveTab] = useState('basic')
+  const [storeWidgets, setStoreWidgets] = useState([])
+  const [loadingStore, setLoadingStore] = useState(false)
   const fileInputRef = useRef(null)
   
   useEffect(() => {
@@ -25,6 +27,60 @@ export default function Dashboard() {
       return cleanup
     }
   }, [])
+
+  useEffect(() => {
+    if (activeMenu === 'store' && storeWidgets.length === 0) {
+      setLoadingStore(true)
+      fetch('https://jsonblob.com/api/jsonBlob/019e6603-2cb0-72ca-8ab7-2898eace8c5c')
+        .then(res => res.json())
+        .then(data => {
+          setStoreWidgets(data.widgets || [])
+          setLoadingStore(false)
+        })
+        .catch(err => {
+          console.error("Store error:", err)
+          setLoadingStore(false)
+        })
+    }
+  }, [activeMenu])
+
+  const publishWidget = async (widget) => {
+    try {
+      const widgetName = prompt("Widget için kısa bir isim girin:", "Yeni Modül");
+      if (!widgetName) return;
+      const widgetAuthor = prompt("Yazar isminiz (Mağazada görünecek):", "Aura Geliştiricisi");
+      if (!widgetAuthor) return;
+
+      alert("Buluta yükleniyor, lütfen bekleyin...");
+      const url = 'https://jsonblob.com/api/jsonBlob/019e6603-2cb0-72ca-8ab7-2898eace8c5c';
+      const getRes = await fetch(url);
+      const data = await getRes.json();
+      
+      const newWidget = {
+        id: `custom_${Date.now()}`,
+        name: widgetName,
+        author: widgetAuthor,
+        description: "Topluluk tarafından oluşturuldu ve yüklendi.",
+        downloads: 0,
+        htmlContent: widget.settings.htmlContent
+      };
+      
+      data.widgets.push(newWidget);
+      
+      await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      // Update local state so store is fresh
+      setStoreWidgets(data.widgets);
+      alert("✅ Harika! Widget'ınız başarıyla Aura Bulut Mağazasına yayınlandı. Tüm dünyadaki kullanıcılar artık bunu indirebilir!");
+      setActiveMenu('store');
+    } catch (e) {
+      alert("❌ Yayınlama başarısız oldu: " + e.message);
+    }
+  }
 
   const saveConfig = (newConfig) => {
     setConfig(newConfig)
@@ -260,6 +316,7 @@ export default function Dashboard() {
               <GalleryItem title="Hava Durumu" desc="Anlık sıcaklık durumu" onClick={() => addWidget('weather')} />
               <GalleryItem title="Yapışkan Not" desc="Masaüstü not defteri" onClick={() => addWidget('notes')} />
               <GalleryItem title="Pomodoro" desc="Odaklanma zamanlayıcısı" onClick={() => addWidget('pomodoro')} />
+              <GalleryItem title="Aura Core (3D)" desc="WebGL destekli 3 boyutlu reaktör" onClick={() => addWidget('threed')} highlight color="red" />
             </div>
           </div>
         )}
@@ -271,72 +328,45 @@ export default function Dashboard() {
                 <h2 className="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Aura Mağazası (Topluluk)</h2>
                 <p className="text-white/50">Diğer kullanıcılar tarafından kodlanmış gelişmiş modülleri (Blueprints) indirin.</p>
               </div>
-              <div className="px-4 py-1.5 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-full text-sm font-medium">Beta V3.0</div>
+              <div className="px-4 py-1.5 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-full text-sm font-medium flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Bulut Senkronizasyonu Aktif
+              </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              <div className="bg-black/40 border border-white/5 hover:border-blue-500/30 transition-colors rounded-2xl overflow-hidden flex flex-col group">
-                <div className="h-32 bg-gradient-to-br from-green-900/40 to-black relative overflow-hidden flex items-center justify-center border-b border-white/5">
-                  <div className="text-green-500 font-mono text-xl opacity-50 tracking-widest">10101101</div>
-                </div>
-                <div className="p-6 flex-1 flex flex-col">
-                  <h3 className="font-bold text-xl mb-1">Matrix Yağmuru</h3>
-                  <p className="text-sm text-white/50 mb-6">Masaüstünüze efsanevi Matrix yeşil kod yağmuru efekti ekleyen özel HTML Canvas eklentisi.</p>
-                  <button onClick={() => {
-                    const html = `<style>body{margin:0;overflow:hidden;background:#000}canvas{display:block}</style><canvas id="c"></canvas><script>const c=document.getElementById("c"),ctx=c.getContext("2d");c.width=window.innerWidth;c.height=window.innerHeight;const letters="0123456789ABCDEF".split("");const fontSize=16,columns=c.width/fontSize;const drops=[];for(let x=0;x<columns;x++)drops[x]=1;setInterval(()=>{ctx.fillStyle="rgba(0,0,0,0.05)";ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle="#0F0";ctx.font=fontSize+"px arial";for(let i=0;i<drops.length;i++){const text=letters[Math.floor(Math.random()*letters.length)];ctx.fillText(text,i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>c.height&&Math.random()>0.975)drops[i]=0;drops[i]++}},33);</script>`;
-                    const newConfig = { ...config };
-                    newConfig.widgets.push({
-                      id: `w_${Date.now()}`, type: 'custom', position: { x: 100, y: 100 },
-                      settings: { scale: 1.0, opacity: 0.2, blur: 0, radius: 16, htmlContent: html, width: 400, height: 600 }
-                    });
-                    saveConfig(newConfig);
-                    setActiveMenu('active');
-                  }} className="mt-auto w-full py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">İndir ve Ekle</button>
-                </div>
+            {loadingStore ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
               </div>
-
-              <div className="bg-black/40 border border-white/5 hover:border-purple-500/30 transition-colors rounded-2xl overflow-hidden flex flex-col group">
-                <div className="h-32 bg-gradient-to-br from-pink-900/40 to-purple-900/20 relative overflow-hidden flex items-center justify-center border-b border-white/5">
-                  <div className="text-pink-400 font-bold text-3xl blur-[1px]">10:42</div>
-                </div>
-                <div className="p-6 flex-1 flex flex-col">
-                  <h3 className="font-bold text-xl mb-1">Cyber Neon Saat</h3>
-                  <p className="text-sm text-white/50 mb-6">Parıldayan neon efektlerine sahip, devasa boyutlu özel bir dijital saat görünümü.</p>
-                  <button onClick={() => {
-                    const html = `<style>@import url('https://fonts.googleapis.com/css2?family=Monoton&display=swap'); body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:transparent;color:#ff00ff;font-family:'Monoton',cursive;text-shadow:0 0 10px #ff00ff,0 0 20px #ff00ff,0 0 40px #ff00ff;} h1{font-size:5rem;margin:0;}</style><h1>23:59</h1><script>setInterval(()=>{const d=new Date();document.querySelector('h1').innerText=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')},1000)</script>`;
-                    const newConfig = { ...config };
-                    newConfig.widgets.push({
-                      id: `w_${Date.now()}`, type: 'custom', position: { x: 300, y: 200 },
-                      settings: { scale: 1.0, opacity: 0.1, blur: 0, radius: 0, htmlContent: html, width: 400, height: 200, borderWidth: 0 }
-                    });
-                    saveConfig(newConfig);
-                    setActiveMenu('active');
-                  }} className="mt-auto w-full py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">İndir ve Ekle</button>
-                </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {storeWidgets.map(widget => (
+                  <div key={widget.id} className="bg-black/40 border border-white/5 hover:border-blue-500/30 transition-colors rounded-2xl overflow-hidden flex flex-col group">
+                    <div className="h-32 bg-gradient-to-br from-blue-900/40 to-black relative overflow-hidden flex items-center justify-center border-b border-white/5">
+                      <div className="text-blue-500 font-mono text-xl opacity-50 tracking-widest">{widget.name}</div>
+                    </div>
+                    <div className="p-6 flex-1 flex flex-col">
+                      <div className="flex justify-between items-start mb-1">
+                        <h3 className="font-bold text-xl">{widget.name}</h3>
+                        <span className="text-xs text-white/40 bg-white/5 px-2 py-1 rounded-md">Yazar: {widget.author}</span>
+                      </div>
+                      <p className="text-sm text-white/50 mb-6">{widget.description}</p>
+                      <button onClick={() => {
+                        const newConfig = { ...config };
+                        newConfig.widgets.push({
+                          id: `w_${Date.now()}`, type: 'custom', position: { x: 200, y: 200 },
+                          settings: { scale: 1.0, opacity: 0.1, blur: 0, radius: 16, htmlContent: widget.htmlContent, width: 400, height: 400, borderWidth: 0 }
+                        });
+                        saveConfig(newConfig);
+                        setActiveMenu('active');
+                      }} className="mt-auto w-full py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">
+                        İndir ve Ekle ({widget.downloads} İndirme)
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-
-              <div className="bg-black/40 border border-white/5 hover:border-cyan-500/30 transition-colors rounded-2xl overflow-hidden flex flex-col group">
-                <div className="h-32 bg-gradient-to-br from-cyan-900/40 to-blue-900/20 relative overflow-hidden flex items-center justify-center border-b border-white/5">
-                  <div className="text-cyan-400 font-bold text-xl drop-shadow-[0_0_10px_rgba(34,211,238,1)] border-4 border-cyan-400 rounded-full w-16 h-16 flex items-center justify-center">TRON</div>
-                </div>
-                <div className="p-6 flex-1 flex flex-col">
-                  <h3 className="font-bold text-xl mb-1">Tron Halkası</h3>
-                  <p className="text-sm text-white/50 mb-6">Fütüristik, parlayan ve iç içe dönen animasyonlu neon enerji halkaları.</p>
-                  <button onClick={() => {
-                    const html = `<style>body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:transparent;} .ring{width:150px;height:150px;border:5px solid transparent;border-top:5px solid #0ff;border-right:5px solid #0ff;border-radius:50%;animation:spin 2s linear infinite;box-shadow:0 0 20px #0ff, inset 0 0 20px #0ff; display:flex; align-items:center; justify-content:center;} .ring::after{content:'';position:absolute;width:120px;height:120px;border:5px solid transparent;border-bottom:5px solid #f0f;border-left:5px solid #f0f;border-radius:50%;animation:spin 1.5s linear infinite reverse;box-shadow:0 0 15px #f0f, inset 0 0 15px #f0f;} @keyframes spin{100%{transform:rotate(360deg);}}</style><div class="ring"></div>`;
-                    const newConfig = { ...config };
-                    newConfig.widgets.push({
-                      id: `w_${Date.now()}`, type: 'custom', position: { x: 400, y: 200 },
-                      settings: { scale: 1.0, opacity: 0.1, blur: 0, radius: 0, htmlContent: html, width: 220, height: 220, borderWidth: 0 }
-                    });
-                    saveConfig(newConfig);
-                    setActiveMenu('active');
-                  }} className="mt-auto w-full py-3 bg-cyan-500 text-black rounded-xl font-bold hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/20">İndir ve Ekle</button>
-                </div>
-              </div>
-
-            </div>
+            )}
           </div>
         )}
 
@@ -537,7 +567,11 @@ export default function Dashboard() {
                               {w.type === 'custom' && (
                                 <div>
                                   <label className="block text-xs font-semibold text-white/50 uppercase mb-2">HTML / CSS / JS Kodu</label>
-                                  <textarea value={w.settings?.htmlContent || ''} onChange={(e) => updateSetting(w.id, 'htmlContent', e.target.value)} className="w-full h-48 bg-[#0a0a0a] text-green-400 font-mono text-sm border border-white/10 rounded-xl p-4 outline-none resize-y focus:border-blue-500 transition-colors" spellCheck="false" />
+                                  <textarea value={w.settings?.htmlContent || ''} onChange={(e) => updateSetting(w.id, 'htmlContent', e.target.value)} className="w-full h-48 bg-[#0a0a0a] text-green-400 font-mono text-sm border border-white/10 rounded-xl p-4 outline-none resize-y focus:border-blue-500 transition-colors mb-4" spellCheck="false" />
+                                  <button onClick={() => publishWidget(w)} className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-bold hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all flex items-center justify-center gap-2">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                    Tüm Dünyayla Paylaş (Bulut Mağazaya Yayınla)
+                                  </button>
                                 </div>
                               )}
 
@@ -547,8 +581,20 @@ export default function Dashboard() {
                          {/* === GÖRÜNÜM AYARLARI === */}
                          {activeTab === 'appearance' && (
                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl">
+                              <div className="md:col-span-2 p-5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl flex items-center justify-between">
+                                  <div>
+                                    <h4 className="font-bold text-white text-lg">Şeffaf Mod (Ultimate Freedom)</h4>
+                                    <p className="text-white/50 text-sm">Arka planı, cam efektini ve çerçeveyi tamamen kapatır. Masaüstünüzde sadece yazı veya objeler kalır.</p>
+                                  </div>
+                                  <button 
+                                    onClick={() => updateSetting(w.id, 'isTransparent', !w.settings?.isTransparent)}
+                                    className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${w.settings?.isTransparent ? 'bg-blue-500' : 'bg-white/20'}`}
+                                  >
+                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${w.settings?.isTransparent ? 'translate-x-8' : 'translate-x-1'}`} />
+                                  </button>
+                               </div>
                               
-                              <div className="space-y-6">
+                              <div className={`space-y-6 transition-opacity ${w.settings?.isTransparent ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
                                 <div>
                                   <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Büyüklük (Scale)</span><span className="text-blue-400">{w.settings?.scale || 1.0}x</span></div>
                                   <input type="range" min="0.5" max="3.0" step="0.1" value={w.settings?.scale || 1.0} onChange={(e) => updateSetting(w.id, 'scale', parseFloat(e.target.value))} className="w-full accent-blue-500" />

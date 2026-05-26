@@ -17,5 +17,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const listener = (event, isExposed) => callback(isExposed);
     ipcRenderer.on('expose-toggled', listener);
     return () => ipcRenderer.removeListener('expose-toggled', listener);
-  }
+  },
+  onContextChanged: (callback) => {
+    const listener = (event, context) => callback(context);
+    ipcRenderer.on('context-changed', listener);
+    return () => ipcRenderer.removeListener('context-changed', listener);
+  },
+  openExternal: (url) => ipcRenderer.send('open-external', url)
 });
