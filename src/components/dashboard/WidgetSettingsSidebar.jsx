@@ -31,20 +31,23 @@ const WidgetSettingsSidebar = memo(({ widget, updateSetting, closeSidebar, remov
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-7 custom-scrollbar pb-10">
-        
-        {/* Live Preview - Sabit ve Otomatik Boyutlandırılmış */}
-        <div className="flex flex-col gap-2">
-           <span className="text-[13px] text-white/50 uppercase ml-4 block mb-1">Canlı Önizleme</span>
-           <div className="ios-inset-group p-4 flex items-center justify-center min-h-[250px] relative bg-black/20" style={{ overflow: 'hidden' }}>
-             {/* Auto Scale wrapper: 350px e sığdırmak için küçült, büyüme yapma */}
-             <div className="relative flex items-center justify-center" style={{ transform: `scale(${Math.min(1, 350 / Math.max(1, s.width || 300))})`, transformOrigin: 'center' }}>
-               <LivePreview widget={widget} />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Sabit Üst Kısım: Canlı Önizleme */}
+        <div className="shrink-0 p-5 border-b border-white/10 bg-black/10 relative z-10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+          <div className="flex flex-col gap-2">
+             <span className="text-[13px] text-white/50 uppercase ml-4 block mb-1">Canlı Önizleme</span>
+             <div className="ios-inset-group p-4 flex items-center justify-center min-h-[200px] relative bg-black/20" style={{ overflow: 'hidden' }}>
+               <div className="relative flex items-center justify-center" style={{ transform: `scale(${Math.min(1, 350 / Math.max(1, s.width || 300))})`, transformOrigin: 'center' }}>
+                 <LivePreview widget={widget} />
+               </div>
              </div>
-           </div>
+          </div>
         </div>
 
-        {/* Görünüm Ayarları */}
+        {/* Kaydırılabilir Alt Kısım: Ayarlar */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-7 custom-scrollbar pb-32">
+          
+          {/* Görünüm Ayarları */}
         <div>
           <span className="text-[13px] text-white/50 uppercase ml-4 block mb-2">Görünüm ve Stil</span>
           <div className="ios-inset-group flex flex-col">
@@ -165,12 +168,93 @@ const WidgetSettingsSidebar = memo(({ widget, updateSetting, closeSidebar, remov
                   <option value="39.9208,32.8541" className="bg-[#1c1c1e]">Ankara</option>
                   <option value="38.4237,27.1428" className="bg-[#1c1c1e]">İzmir</option>
                   <option value="40.7128,-74.0060" className="bg-[#1c1c1e]">New York</option>
+                  <option value="51.5074,-0.1278" className="bg-[#1c1c1e]">London</option>
+                  <option value="35.6762,139.6503" className="bg-[#1c1c1e]">Tokyo</option>
                 </select>
               </div>
             </div>
           </div>
         )}
 
+        {widget.type === 'github' && (
+          <div>
+            <span className="text-[13px] text-white/50 uppercase ml-4 block mb-2">Github API Verisi</span>
+            <div className="ios-inset-group">
+              <div className="ios-list-item flex-col items-start gap-3">
+                <span className="text-white text-[16px]">Kullanıcı Adı</span>
+                <input 
+                  type="text" 
+                  value={s.username || 'mert'} 
+                  onChange={e => updateSetting(widget.id, 'username', e.target.value)} 
+                  className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500 transition-colors"
+                  placeholder="github username..."
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {widget.type === 'news' && (
+          <div>
+            <span className="text-[13px] text-white/50 uppercase ml-4 block mb-2">RSS Haber Kaynağı</span>
+            <div className="ios-inset-group">
+              <div className="ios-list-item flex-col items-start gap-3">
+                <span className="text-white text-[16px]">Haber Kategorisi</span>
+                <select 
+                  value={s.category || 'technology'} 
+                  onChange={e => updateSetting(widget.id, 'category', e.target.value)}
+                  className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                >
+                  <option value="technology">Teknoloji</option>
+                  <option value="business">İş / Finans</option>
+                  <option value="sports">Spor</option>
+                  <option value="science">Bilim</option>
+                  <option value="general">Gündem</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {widget.type === 'worldclock' && (
+          <div>
+            <span className="text-[13px] text-white/50 uppercase ml-4 block mb-2">Zaman Dilimi Ayarı</span>
+            <div className="ios-inset-group">
+              <div className="ios-list-item flex-col items-start gap-3">
+                <span className="text-white text-[16px]">Bölge (Timezone)</span>
+                <select 
+                  value={s.timezone || 'Europe/Istanbul'} 
+                  onChange={e => updateSetting(widget.id, 'timezone', e.target.value)}
+                  className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                >
+                  <option value="Europe/Istanbul">İstanbul (TR)</option>
+                  <option value="America/New_York">New York (EST)</option>
+                  <option value="Europe/London">Londra (GMT)</option>
+                  <option value="Asia/Tokyo">Tokyo (JST)</option>
+                  <option value="Australia/Sydney">Sidney (AEST)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {widget.type === 'custom' && (
+          <div>
+            <span className="text-[13px] text-white/50 uppercase ml-4 block mb-2">Özel Kod (HTML/CSS)</span>
+            <div className="ios-inset-group">
+              <div className="p-4 flex-col items-start gap-3 w-full">
+                <textarea 
+                  value={s.htmlContent || '<h1>Merhaba Aura!</h1>'} 
+                  onChange={e => updateSetting(widget.id, 'htmlContent', e.target.value)} 
+                  className="w-full h-32 bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white font-mono text-xs outline-none focus:border-blue-500 transition-colors"
+                  placeholder="<div>Özel kodunuzu buraya yazın...</div>"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+        
+        </div>
       </div>
     </div>
   );

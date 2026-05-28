@@ -306,7 +306,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 md:p-10 max-w-6xl overflow-y-auto z-10 mx-auto w-full pt-28">
+      <main className="flex-1 p-6 md:p-10 max-w-6xl overflow-y-auto z-10 mx-auto w-full pt-10 pb-32 custom-scrollbar">
         
         {activeMenu === 'gallery' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 mt-6">
@@ -448,22 +448,25 @@ export default function Dashboard() {
                </div>
              )}
 
-             <div className="space-y-6">
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                {config.widgets.map(w => (
-                 <div key={w.id} className={`bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-300 ${editingId === w.id ? 'ring-2 ring-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.15)]' : 'hover:border-white/20'}`}>
+                 <div key={w.id} className={`group relative bg-white/[0.02] backdrop-blur-2xl border ${editingId === w.id ? 'border-blue-500 shadow-[0_0_40px_rgba(59,130,246,0.3)]' : 'border-white/10 hover:border-white/30'} rounded-[32px] overflow-hidden transition-all duration-500 flex flex-col`}>
                    
-                   {/* Card Header */}
-                   <div className="flex items-center justify-between p-5 bg-black/20">
-                     <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/50 uppercase font-bold text-xs">
-                         {w.type.substring(0,2)}
-                       </div>
-                       <div>
-                         <div className="font-semibold capitalize text-lg tracking-wide">{w.type}</div>
-                         <div className="text-xs text-white/40 font-mono">ID: {w.id}</div>
-                       </div>
+                   {/* Card Header (Preview Mockup) */}
+                   <div className="h-32 bg-black/20 flex items-center justify-center border-b border-white/5 relative overflow-hidden">
+                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+                     <span className="text-6xl drop-shadow-2xl scale-90 group-hover:scale-110 transition-transform duration-500 opacity-60 group-hover:opacity-100">
+                       {w.type === 'clock' ? '⏰' : w.type === 'sysmon' ? '💻' : w.type === 'crypto' ? '🪙' : w.type === 'weather' ? '🌤️' : w.type === 'notes' ? '📝' : w.type === 'pomodoro' ? '🍅' : w.type === 'github' ? '🐙' : w.type === 'news' ? '📰' : w.type === 'ai' ? '🤖' : w.type === 'calendar' ? '📅' : w.type === 'worldclock' ? '🌍' : w.type === 'countdown' ? '⏳' : w.type === 'shortcuts' ? '🚀' : w.type === 'hardware' ? '⚙️' : w.type === 'threed' ? '🧊' : w.type === 'media' ? '🎵' : w.type === 'stock' ? '📈' : '✨'}
+                     </span>
+                   </div>
+                   
+                   {/* Card Body */}
+                   <div className="p-6 flex-1 flex flex-col justify-between">
+                     <div>
+                       <div className="font-bold text-2xl text-white capitalize mb-1 tracking-tight">{w.type}</div>
+                       <div className="text-[10px] text-white/40 font-mono tracking-widest uppercase bg-white/5 inline-block px-2.5 py-1 rounded-lg mb-6 border border-white/5">{w.id}</div>
                      </div>
-                      <div className="flex gap-2">
+                     <div className="flex gap-3">
                         <button 
                           onClick={() => {
                             if (editingId === w.id) {
@@ -472,21 +475,21 @@ export default function Dashboard() {
                               setEditingId(w.id)
                             }
                           }}
-                          className={`px-4 py-2 font-medium rounded-[12px] transition-colors text-sm shadow-sm ${editingId === w.id ? 'bg-white/20 text-white' : 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20'}`}
+                          className={`flex-1 py-3 font-bold rounded-xl transition-all duration-300 shadow-sm ${editingId === w.id ? 'bg-white text-black' : 'bg-blue-500 text-white hover:bg-blue-400 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]'}`}
                         >
                           {editingId === w.id ? 'Ayarları Kapat' : 'Düzenle'}
                         </button>
                         <button 
                           onClick={() => removeWidget(w.id)}
-                          className="px-4 py-2 bg-red-500/10 text-red-400 font-medium rounded-[12px] hover:bg-red-500/20 transition-colors text-sm shadow-sm"
+                          className="w-14 flex items-center justify-center bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all duration-300"
                         >
-                          Sil
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                     </div>
+                   </div>
+                 </div>
+               ))}
+             </div>
             )}
           </div>
         )}
