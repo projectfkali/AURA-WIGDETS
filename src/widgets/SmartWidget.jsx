@@ -52,13 +52,16 @@ export default function SmartWidget({ settings }) {
     <div className="w-full h-full flex items-center justify-center">
       
       {type === 'text' && (
-        <div className="text-xl font-medium tracking-wide text-center">
+        <div className="text-xl font-bold tracking-tight text-center text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 drop-shadow-md">
           {textContent}
         </div>
       )}
 
       {type === 'image' && (
-        <img src={imageUrl} alt="Widget" className="max-w-full max-h-[200px] object-contain rounded" />
+        <div 
+          className="w-full h-full min-h-[100px] rounded-[24px] bg-center bg-cover bg-no-repeat border border-white/10 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] transition-all"
+          style={{ backgroundImage: `url(${imageUrl})`, filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.3))' }}
+        />
       )}
 
       {type === 'api' && (

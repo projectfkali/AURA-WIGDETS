@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import LivePreview from '../components/dashboard/LivePreview'
 import FloatingNav from '../components/dashboard/FloatingNav'
-import WidgetSettingsSidebar from '../components/dashboard/WidgetSettingsSidebar'
+import WidgetSettingsModal from '../components/dashboard/WidgetSettingsModal'
+import { nanoid } from 'nanoid'
 
 const colorMap = {
   white: 'bg-white text-white',
@@ -306,7 +307,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 md:p-10 max-w-6xl overflow-y-auto z-10 mx-auto w-full pt-10 pb-32 custom-scrollbar">
+      <main className="flex-1 p-6 md:p-10 max-w-6xl overflow-y-auto z-10 mx-auto w-full pt-10 pb-[300px] custom-scrollbar">
         
         {activeMenu === 'gallery' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 mt-6">
@@ -560,12 +561,12 @@ export default function Dashboard() {
 
       </main>
 
-      {/* iOS 26 Widget Settings Sidebar Overlay */}
+      {/* iOS 26 / VisionOS Widget Settings Modal Overlay */}
       {editingId && (
-        <WidgetSettingsSidebar 
+        <WidgetSettingsModal 
           widget={config.widgets.find(w => w.id === editingId)} 
           updateSetting={updateSetting} 
-          closeSidebar={() => setEditingId(null)}
+          closeModal={() => setEditingId(null)}
           removeWidget={(id) => {
              removeWidget(id);
              setEditingId(null);
