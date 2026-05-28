@@ -33,7 +33,7 @@ export default function AiWidget({ settings }) {
   }
 
   return (
-    <div className="glass-panel w-[320px] h-[400px] flex flex-col overflow-hidden text-sm relative group">
+    <div className="w-full h-full flex flex-col overflow-hidden text-sm relative group">
       
       {/* Header */}
       <div className="p-3 bg-white/5 border-b border-white/10 flex items-center gap-2 drag-handle">

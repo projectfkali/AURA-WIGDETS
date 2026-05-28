@@ -9,15 +9,17 @@ export default function CustomWidget({ settings }) {
 </script>`
 
   const htmlContent = settings.htmlContent || defaultHtml
-  const width = settings.width || 300
-  const height = settings.height || 200
 
   return (
-    <div className="glass-panel p-2 flex items-center justify-center" style={{ width, height }}>
-      <iframe
-        srcDoc={htmlContent}
-        style={{ width: '100%', height: '100%', border: 'none', background: 'transparent' }}
-        sandbox="allow-scripts"
+    <div className="w-full h-full relative overflow-hidden flex flex-col">
+      <div className="absolute top-0 right-0 bg-black/50 text-white/50 text-[8px] px-2 py-0.5 rounded-bl-lg z-10 pointer-events-none">
+        Özel Widget
+      </div>
+      <iframe 
+        srcDoc={htmlContent} 
+        className="w-full h-full border-none"
+        sandbox="allow-scripts allow-same-origin"
+        title="Custom Widget"
       />
     </div>
   )

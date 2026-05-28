@@ -13,20 +13,24 @@ export default function SysmonWidget({ settings }) {
   const [prevCpu, setPrevCpu] = useState({ idle: 0, total: 0 })
 
   useEffect(() => {
+    let lastCpu = { idle: 0, total: 0 }
+
     const fetchStats = async () => {
       if (!window.electronAPI) return
       const rawStats = await window.electronAPI.getSysStats()
       
-      const idleDiff = rawStats.cpuIdle - prevCpu.idle
-      const totalDiff = rawStats.cpuTotal - prevCpu.total
+      const idleDiff = rawStats.cpuIdle - lastCpu.idle
+      const totalDiff = rawStats.cpuTotal - lastCpu.total
       
-      let newCpuUsage = stats.cpuUsage // Önceki kullanımı koru (Bug fix)
-      if (totalDiff > 0) {
+      let newCpuUsage = 0
+      if (totalDiff > 0 && lastCpu.total > 0) {
         newCpuUsage = 100 - Math.floor((idleDiff / totalDiff) * 100)
       }
 
-      setPrevCpu({ idle: rawStats.cpuIdle, total: rawStats.cpuTotal })
-      setStats({
+      lastCpu = { idle: rawStats.cpuIdle, total: rawStats.cpuTotal }
+
+      setStats(prev => ({
+        ...prev,
         memUsage: rawStats.memUsage,
         usedMem: rawStats.usedMem,
         totalMem: rawStats.totalMem,
@@ -34,13 +38,13 @@ export default function SysmonWidget({ settings }) {
         uptime: rawStats.uptime || 0,
         activeNet: rawStats.activeNet || false,
         cpuModel: rawStats.cpuModel || 'Bilinmeyen İşlemci'
-      })
+      }))
     }
 
     fetchStats()
     const interval = setInterval(fetchStats, 2000)
     return () => clearInterval(interval)
-  }, [prevCpu, stats.cpuUsage])
+  }, [])
 
   const theme = colorMap[settings.color || 'white']
 

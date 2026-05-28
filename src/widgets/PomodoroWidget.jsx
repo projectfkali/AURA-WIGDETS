@@ -35,7 +35,7 @@ export default function PomodoroWidget({ settings }) {
   const secs = String(timeLeft % 60).padStart(2, '0')
 
   return (
-    <div className="glass-panel p-5 w-[200px] flex flex-col items-center">
+    <div className="w-full h-full p-3 flex flex-col items-center justify-center relative">
       <div className="text-xs text-white/50 uppercase tracking-widest mb-3">Pomodoro</div>
       <div className={`text-5xl font-mono font-bold mb-4 ${textColor}`}>
         {mins}:{secs}

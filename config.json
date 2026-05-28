@@ -1,11 +1,11 @@
 {
   "widgets": [
     {
-      "id": "w_1779830470685",
-      "type": "shortcuts",
+      "id": "w_1779997968758",
+      "type": "github",
       "position": {
-        "x": 680,
-        "y": 720
+        "x": 1200,
+        "y": 160
       },
       "settings": {
         "scale": 1,
@@ -17,9 +17,55 @@
         "bgColorHex": "#000000",
         "fontFamily": "inherit",
         "color": "white",
-        "width": 300,
-        "height": 100,
-        "isTransparent": true
+        "width": 320,
+        "height": 140
+      }
+    },
+    {
+      "id": "w_1779998010618",
+      "type": "weather",
+      "position": {
+        "x": 1240,
+        "y": 340
+      },
+      "settings": {
+        "scale": 1,
+        "opacity": 0.65,
+        "blur": 26,
+        "radius": 72,
+        "borderWidth": 1,
+        "padding": 14,
+        "bgColorHex": "#411010",
+        "fontFamily": "inherit",
+        "color": "white",
+        "width": 240,
+        "height": 170,
+        "lat": "39.9208",
+        "lon": "32.8541",
+        "cityName": "Ankara",
+        "isTransparent": false
+      }
+    },
+    {
+      "id": "w_1779998138689",
+      "type": "crypto",
+      "position": {
+        "x": 1200,
+        "y": 0
+      },
+      "settings": {
+        "scale": 1,
+        "opacity": 0.4,
+        "blur": 24,
+        "radius": 32,
+        "borderWidth": 1,
+        "padding": 24,
+        "bgColorHex": "#000000",
+        "fontFamily": "inherit",
+        "color": "white",
+        "coin": "solana",
+        "width": 240,
+        "height": 140
       }
     }
   ]

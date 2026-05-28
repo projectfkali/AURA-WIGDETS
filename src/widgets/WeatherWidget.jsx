@@ -9,7 +9,8 @@ const colorMap = {
 }
 
 export default function WeatherWidget({ settings }) {
-  const [data, setData] = useState({ temp: 0, wmoCode: 0, wind: 0, loading: true })
+  const [data, setData] = useState({ temp: 0, wmoCode: 0, wind: 0, humidity: 0, feelsLike: 0, loading: true })
+  const [cityName, setCityName] = useState(settings.cityName || 'İstanbul')
   
   const lat = settings.lat || '41.0082'
   const lon = settings.lon || '28.9784'
@@ -18,15 +19,29 @@ export default function WeatherWidget({ settings }) {
   useEffect(() => {
     setData(prev => ({ ...prev, loading: true }))
     
+    // Eğer cityName settings'den geliyorsa onu kullan
+    if (settings.cityName) {
+      setCityName(settings.cityName)
+    }
+    
     const fetchWeather = async () => {
       try {
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m,apparent_temperature&timezone=auto`
+        )
         const json = await res.json()
         if (json.current_weather) {
+          // Saatlik veriden güncel nem ve hissedilen sıcaklığı al
+          const currentHourIndex = new Date().getHours()
+          const humidity = json.hourly?.relativehumidity_2m?.[currentHourIndex] || 0
+          const feelsLike = json.hourly?.apparent_temperature?.[currentHourIndex] || json.current_weather.temperature
+          
           setData({
             temp: json.current_weather.temperature,
             wmoCode: json.current_weather.weathercode,
             wind: json.current_weather.windspeed,
+            humidity,
+            feelsLike,
             loading: false
           })
         }
@@ -36,18 +51,20 @@ export default function WeatherWidget({ settings }) {
     }
 
     fetchWeather()
-    const interval = setInterval(fetchWeather, 900000)
+    const interval = setInterval(fetchWeather, 900000) // 15 dk
     return () => clearInterval(interval)
-  }, [lat, lon])
+  }, [lat, lon, settings.cityName])
 
   const getWeatherDetails = (code) => {
-    if (code === 0) return { icon: '☀️', desc: 'Açık / Güneşli' }
-    if (code >= 1 && code <= 3) return { icon: '⛅', desc: 'Parçalı Bulutlu' }
-    if (code >= 45 && code <= 48) return { icon: '🌫️', desc: 'Sisli' }
-    if (code >= 51 && code <= 67) return { icon: '🌧️', desc: 'Yağmurlu' }
-    if (code >= 71 && code <= 77) return { icon: '❄️', desc: 'Karlı' }
-    if (code >= 95 && code <= 99) return { icon: '⛈️', desc: 'Fırtınalı' }
-    return { icon: '🌡️', desc: 'Bilinmeyen' }
+    if (code === 0) return { icon: '☀️', desc: 'Clear Sky' }
+    if (code >= 1 && code <= 3) return { icon: '⛅', desc: 'Partly Cloudy' }
+    if (code >= 45 && code <= 48) return { icon: '🌫️', desc: 'Foggy' }
+    if (code >= 51 && code <= 55) return { icon: '🌦️', desc: 'Light Drizzle' }
+    if (code >= 56 && code <= 67) return { icon: '🌧️', desc: 'Rainy' }
+    if (code >= 71 && code <= 77) return { icon: '❄️', desc: 'Snowy' }
+    if (code >= 80 && code <= 82) return { icon: '🌧️', desc: 'Rain Showers' }
+    if (code >= 95 && code <= 99) return { icon: '⛈️', desc: 'Thunderstorm' }
+    return { icon: '🌡️', desc: 'Unknown' }
   }
 
   if (data.loading) {
@@ -59,24 +76,9 @@ export default function WeatherWidget({ settings }) {
   }
 
   const weather = getWeatherDetails(data.wmoCode)
-  // Şehir adını enlem boylama göre kaba bir tahmin (Mükemmel değil ama şık)
-  const isIstanbul = lat.includes('41.00')
-  const isAnkara = lat.includes('39.92')
-  const isIzmir = lat.includes('38.42')
-  const isNy = lat.includes('40.71')
-  const isLondon = lat.includes('51.50')
-  const isTokyo = lat.includes('35.67')
-  
-  let cityName = 'Özel Konum'
-  if (isIstanbul) cityName = 'İstanbul'
-  if (isAnkara) cityName = 'Ankara'
-  if (isIzmir) cityName = 'İzmir'
-  if (isNy) cityName = 'New York'
-  if (isLondon) cityName = 'Londra'
-  if (isTokyo) cityName = 'Tokyo'
 
   return (
-    <div className="w-full h-full flex flex-col justify-between p-2">
+    <div className="w-full h-full flex flex-col justify-between p-3">
       <div className="flex justify-between items-start">
         <div>
           <h3 className="font-bold text-white text-lg tracking-wide">{cityName}</h3>
@@ -87,14 +89,26 @@ export default function WeatherWidget({ settings }) {
         </div>
       </div>
       
-      <div className="mt-auto flex items-end justify-between">
-        <div className={`text-5xl font-black tracking-tighter ${theme.text}`}>
-          {Math.round(data.temp)}°
-        </div>
-        <div className="flex flex-col items-end gap-1 mb-1">
-          <div className="bg-white/10 backdrop-blur-sm border border-white/10 px-2 py-1 rounded-lg flex items-center gap-1">
-            <svg className="w-3 h-3 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-            <span className="text-[10px] font-bold text-white">{data.wind} km/h</span>
+      <div className="mt-auto">
+        <div className="flex items-end justify-between">
+          <div className={`text-5xl font-black tracking-tighter ${theme.text}`}>
+            {Math.round(data.temp)}°
+          </div>
+          <div className="flex flex-col items-end gap-1 mb-1">
+            <div className="bg-white/10 backdrop-blur-sm border border-white/10 px-2 py-0.5 rounded-lg flex items-center gap-1.5">
+              <span className="text-[10px] text-white/50">Feels</span>
+              <span className="text-[11px] font-bold text-white">{Math.round(data.feelsLike)}°</span>
+            </div>
+            <div className="flex gap-2">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/10 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                <svg className="w-3 h-3 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                <span className="text-[10px] font-bold text-white">{data.wind}km/h</span>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm border border-white/10 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                <span className="text-[10px] text-white/50">💧</span>
+                <span className="text-[10px] font-bold text-white">{data.humidity}%</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

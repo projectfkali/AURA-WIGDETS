@@ -59,7 +59,7 @@ export default function HardwareWidget({ settings }) {
   }, [])
 
   return (
-    <div className="glass-panel p-5 w-[220px] flex flex-col gap-4">
+    <div className="w-full h-full p-3 flex flex-col gap-4">
       
       {/* Batarya */}
       <div className={`p-3 rounded-xl border ${themeClass} flex items-center justify-between`}>

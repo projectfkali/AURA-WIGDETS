@@ -41,7 +41,7 @@ export default function ThreeDWidget({ settings }) {
   const primaryColor = settings.primaryColor || '#e0f7fa';
 
   return (
-    <div className="relative w-64 h-64 pointer-events-none group-hover:pointer-events-auto transition-all duration-500">
+    <div className="w-full h-full relative pointer-events-none group-hover:pointer-events-auto transition-all duration-500">
       <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
         <ambientLight intensity={1} />
         <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1.5} />

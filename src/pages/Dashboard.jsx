@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
+import LivePreview from '../components/dashboard/LivePreview'
+import FloatingNav from '../components/dashboard/FloatingNav'
 
 const colorMap = {
   white: 'bg-white text-white',
@@ -206,11 +208,10 @@ export default function Dashboard() {
 
   const updateSetting = (id, key, value) => {
     const newConfig = { ...config }
-    const widget = newConfig.widgets.find(w => w.id === id)
-    if (widget) {
-      widget.settings = { ...widget.settings, [key]: value }
-      saveConfig(newConfig)
-    }
+    newConfig.widgets = newConfig.widgets.map(w => 
+      w.id === id ? { ...w, settings: { ...w.settings, [key]: value } } : w
+    )
+    saveConfig(newConfig)
   }
 
   const applyTheme = (theme) => {
@@ -295,18 +296,14 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen overflow-hidden text-white font-sans bg-[#0a0a0a] selection:bg-white/30 relative">
+      <FloatingNav activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+      
       {/* Mesh Gradient Arkaplan */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 blur-[120px] rounded-full mix-blend-screen animate-pulse"></div>
         <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-purple-500/20 blur-[150px] rounded-full mix-blend-screen animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      {/* Floating Sidebar */}
-      <aside className="w-72 bg-white/[0.02] border border-white/5 m-6 rounded-3xl p-6 flex flex-col backdrop-blur-3xl shadow-[0_0_40px_rgba(0,0,0,0.5)] z-10">
-        <div className="flex items-center gap-4 mb-10">
-          <div className="w-12 h-12 bg-gradient-to-br from-white to-white/50 text-black font-black flex items-center justify-center rounded-2xl shadow-lg">A</div>
-          <div>
-            <h1 className="font-bold text-lg tracking-tight">Widget Engine</h1>
             <p className="text-[10px] text-white/40 uppercase tracking-widest">Dashboard V2</p>
           </div>
         </div>
@@ -355,14 +352,19 @@ export default function Dashboard() {
             <h2 className="text-4xl font-bold mb-2 tracking-tight">Widget Galerisi</h2>
             <p className="text-white/50 mb-10 text-lg">Masaüstünüzü kişiselleştirmek için modülleri seçin.</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-[200px]">
               <GalleryBento title="Borsa Grafiği" desc="Canlı Hisse" onClick={() => addWidget('stock')} colSpan="md:col-span-2 lg:col-span-2" color="from-teal-500/20 to-green-500/5" icon="📈" />
               <GalleryBento title="GitHub Heatmap" desc="Commit Haritası" onClick={() => addWidget('github')} colSpan="md:col-span-2 lg:col-span-2" color="from-emerald-500/20 to-teal-500/5" icon="🐙" />
               <GalleryBento title="Haberler / RSS" desc="Son Dakika Akışı" onClick={() => addWidget('news')} colSpan="md:col-span-1 lg:col-span-2" color="from-red-500/20 to-orange-500/5" icon="📰" />
+              <GalleryBento title="Aura AI" desc="Akıllı Asistan" onClick={() => addWidget('ai')} colSpan="md:col-span-1 lg:col-span-2" color="from-purple-500/20 to-blue-500/5" icon="🤖" />
+              
               <GalleryBento title="Minimal Takvim" desc="Aylık Ajanda" onClick={() => addWidget('calendar')} colSpan="md:col-span-1 lg:col-span-1" color="from-blue-500/20 to-cyan-500/5" icon="📅" />
               <GalleryBento title="Masaüstü Dock" desc="Kısayollar" onClick={() => addWidget('shortcuts')} colSpan="md:col-span-2 lg:col-span-1" color="from-purple-500/20 to-pink-500/5" icon="🚀" />
               <GalleryBento title="Geri Sayım" desc="Sayaç" onClick={() => addWidget('countdown')} colSpan="md:col-span-1 lg:col-span-1" color="from-yellow-500/20 to-amber-500/5" icon="⏳" />
               <GalleryBento title="Dünya Saatleri" desc="Çoklu Bölge" onClick={() => addWidget('worldclock')} colSpan="md:col-span-1 lg:col-span-1" color="from-indigo-500/20 to-purple-500/5" icon="🌍" />
+              
+              <GalleryBento title="Donanım" desc="Sensörler" onClick={() => addWidget('hardware')} colSpan="md:col-span-1 lg:col-span-1" color="from-orange-500/20 to-red-500/5" icon="⚙️" />
+              <GalleryBento title="Pomodoro" desc="Odaklanma" onClick={() => addWidget('pomodoro')} colSpan="md:col-span-1 lg:col-span-1" color="from-red-500/20 to-rose-500/5" icon="🍅" />
+              <GalleryBento title="Notlar" desc="Hızlı Not" onClick={() => addWidget('notes')} colSpan="md:col-span-1 lg:col-span-1" color="from-yellow-400/20 to-yellow-600/5" icon="📝" />
               
               <GalleryBento title="Akıllı Modül" desc="Veri/AI odaklı" onClick={() => addWidget('smart')} colSpan="md:col-span-1 lg:col-span-1" color="from-green-500/20 to-emerald-500/5" icon="✨" />
               <GalleryBento title="Özel Kod" desc="HTML/CSS/JS" onClick={() => addWidget('custom')} colSpan="md:col-span-1 lg:col-span-1" color="from-blue-500/20 to-indigo-500/5" icon="👨‍💻" />
@@ -510,404 +512,351 @@ export default function Dashboard() {
                            }
                          }}
                          className="px-4 py-2 bg-blue-500/10 text-blue-400 font-medium rounded-lg hover:bg-blue-500/20 transition-colors text-sm"
-                       >
-                         {editingId === w.id ? 'Paneli Kapat' : 'Ayarlar'}
-                       </button>
-                       <button 
-                         onClick={() => removeWidget(w.id)}
-                         className="px-4 py-2 bg-red-500/10 text-red-400 font-medium rounded-lg hover:bg-red-500/20 transition-colors text-sm"
+rounded-lg hover:bg-red-500/20 transition-colors text-sm"
                        >
                          Sil
                        </button>
                      </div>
                    </div>
 
-                   {/* Editor Body */}
+                   {/* Editor Body with Live Preview */}
                    {editingId === w.id && (
-                     <div className="border-t border-white/5">
+                     <div className="border-t border-white/5 flex flex-col lg:flex-row">
                        
-                       {/* Tabs */}
-                       <div className="flex px-5 pt-4 gap-4">
-                         <button 
-                           className={`pb-3 text-sm font-medium transition-all border-b-2 ${activeTab === 'basic' ? 'border-blue-500 text-blue-400' : 'border-transparent text-white/50 hover:text-white'}`}
-                           onClick={() => setActiveTab('basic')}
-                         >
-                           Temel Ayarlar
-                         </button>
-                         <button 
-                           className={`pb-3 text-sm font-medium transition-all border-b-2 ${activeTab === 'appearance' ? 'border-purple-500 text-purple-400' : 'border-transparent text-white/50 hover:text-white'}`}
-                           onClick={() => setActiveTab('appearance')}
-                         >
-                           Görünüm (Cam Efekti)
-                         </button>
-                         {w.type === 'custom' && (
+                       {/* Settings Left Side */}
+                       <div className="flex-1 lg:max-w-2xl border-r border-white/5">
+                         {/* Tabs */}
+                         <div className="flex px-5 pt-4 gap-4 border-b border-white/5">
                            <button 
-                             className={`pb-3 text-sm font-medium transition-all border-b-2 ${activeTab === 'code' ? 'border-green-500 text-green-400' : 'border-transparent text-white/50 hover:text-white'}`}
-                             onClick={() => setActiveTab('code')}
+                             className={`pb-3 text-sm font-medium transition-all border-b-2 ${activeTab === 'basic' ? 'border-blue-500 text-blue-400' : 'border-transparent text-white/50 hover:text-white'}`}
+                             onClick={() => setActiveTab('basic')}
                            >
-                             Kod (Gelişmiş)
+                             Temel Ayarlar
                            </button>
-                         )}
-                       </div>
+                           <button 
+                             className={`pb-3 text-sm font-medium transition-all border-b-2 ${activeTab === 'appearance' ? 'border-purple-500 text-purple-400' : 'border-transparent text-white/50 hover:text-white'}`}
+                             onClick={() => setActiveTab('appearance')}
+                           >
+                             Görünüm
+                           </button>
+                           {w.type === 'custom' && (
+                             <button 
+                               className={`pb-3 text-sm font-medium transition-all border-b-2 ${activeTab === 'code' ? 'border-green-500 text-green-400' : 'border-transparent text-white/50 hover:text-white'}`}
+                               onClick={() => setActiveTab('code')}
+                             >
+                               Gelişmiş Kod
+                             </button>
+                           )}
+                         </div>
 
-                       <div className="p-6 bg-black/10">
-                         {/* === KOD AYARLARI (SADECE CUSTOM) === */}
-                         {activeTab === 'code' && w.type === 'custom' && (
-                           <div className="space-y-4">
-                             <div>
-                               <label className="block text-xs font-semibold text-white/50 uppercase mb-3">Özel HTML / CSS Kodları</label>
-                               <textarea
-                                 className="w-full h-48 bg-black/40 border border-green-500/30 rounded-xl p-4 text-sm font-mono text-green-400 focus:border-green-500 outline-none"
-                                 value={w.settings.htmlContent || ""}
-                                 onChange={(e) => updateWidgetSettings(w.id, 'htmlContent', e.target.value)}
-                               ></textarea>
-                               <p className="text-xs text-white/40 mt-2">İpucu: Neon renklerini değiştirmek için CSS içindeki HEX kodlarını (örn: #0ff) düzenleyebilirsiniz.</p>
-                             </div>
-                           </div>
-                         )}
-
-                         {/* === TEMEL AYARLAR === */}
-                         {activeTab === 'basic' && (
-                            <div className="space-y-6 max-w-2xl">
-                              {w.type !== 'custom' && w.type !== 'smart' && w.type !== 'notes' && (
-                                <div>
-                                  <label className="block text-xs font-semibold text-white/50 uppercase mb-3">Vurgu Rengi</label>
-                                  <div className="flex gap-3">
-                                    {Object.keys(colorMap).map(color => (
-                                      <button
-                                        key={color}
-                                        onClick={() => updateSetting(w.id, 'color', color)}
-                                        className={`w-8 h-8 rounded-full border-[3px] transition-transform ${w.settings?.color === color ? 'border-white scale-110 shadow-lg' : 'border-transparent opacity-50 hover:opacity-100'} ${colorMap[color].split(' ')[0]}`}
-                                      />
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {w.type === 'crypto' && (
-                                <div>
-                                  <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Kripto Para Birimi</label>
-                                  <select value={w.settings?.coin || 'solana'} onChange={(e) => updateSetting(w.id, 'coin', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-blue-500 transition-colors">
-                                    <option value="bitcoin">Bitcoin (BTC)</option>
-                                    <option value="ethereum">Ethereum (ETH)</option>
-                                    <option value="solana">Solana (SOL)</option>
-                                    <option value="dogecoin">Dogecoin (DOGE)</option>
-                                  </select>
-                                </div>
-                              )}
-
-                              {w.type === 'weather' && (
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="col-span-2">
-                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Şehir / Konum (Örn: Istanbul)</label>
-                                    <select 
-                                      value={`${w.settings?.lat || '41.0082'},${w.settings?.lon || '28.9784'}`} 
-                                      onChange={(e) => {
-                                        const [lat, lon] = e.target.value.split(',')
-                                        updateSetting(w.id, 'lat', lat)
-                                        updateSetting(w.id, 'lon', lon)
-                                      }} 
-                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-blue-500 transition-colors"
-                                    >
-                                      <option value="41.0082,28.9784">İstanbul</option>
-                                      <option value="39.9208,32.8541">Ankara</option>
-                                      <option value="38.4237,27.1428">İzmir</option>
-                                      <option value="40.7128,-74.0060">New York</option>
-                                      <option value="51.5074,-0.1278">Londra</option>
-                                      <option value="35.6762,139.6503">Tokyo</option>
-                                    </select>
-                                  </div>
-                                </div>
-                              )}
-
-                              {w.type === 'github' && (
-                                <div className="space-y-4">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">GitHub Kullanıcı Adı</label>
-                                    <input 
-                                      type="text" 
-                                      value={w.settings?.githubUser || ''} 
-                                      onChange={e => updateSetting(w.id, 'githubUser', e.target.value)} 
-                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-emerald-500 transition-colors" 
-                                      placeholder="torvalds" 
-                                    />
-                                    <p className="text-xs text-white/30 mt-2">Commit haritasını görmek istediğiniz GitHub kullanıcı adını girin.</p>
-                                  </div>
-                                </div>
-                              )}
-
-                              {w.type === 'news' && (
-                                <div className="space-y-4">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Haber Kategorisi</label>
-                                    <select 
-                                      value={w.settings?.newsCategory || 'technology'} 
-                                      onChange={(e) => updateSetting(w.id, 'newsCategory', e.target.value)} 
-                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-red-500 transition-colors"
-                                    >
-                                      <option value="technology">🖥️ Teknoloji</option>
-                                      <option value="world">🌍 Dünya</option>
-                                    </select>
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Haber Geçiş Hızı</label>
-                                    <select 
-                                      value={w.settings?.scrollSpeed || 8000} 
-                                      onChange={(e) => updateSetting(w.id, 'scrollSpeed', parseInt(e.target.value))} 
-                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-red-500 transition-colors"
-                                    >
-                                      <option value="5000">5 Saniye (Hızlı)</option>
-                                      <option value="8000">8 Saniye (Normal)</option>
-                                      <option value="15000">15 Saniye (Yavaş)</option>
-                                    </select>
-                                  </div>
-                                </div>
-                              )}
-
-                              {w.type === 'countdown' && (
-                                <div className="space-y-4">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Etkinlik Adı</label>
-                                    <input 
-                                      type="text" 
-                                      value={w.settings?.countdownTitle || ''} 
-                                      onChange={e => updateSetting(w.id, 'countdownTitle', e.target.value)} 
-                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-yellow-500 transition-colors" 
-                                      placeholder="Yeni Yıl" 
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Hedef Tarih</label>
-                                    <input 
-                                      type="datetime-local" 
-                                      value={w.settings?.targetDate || ''} 
-                                      onChange={e => updateSetting(w.id, 'targetDate', e.target.value)} 
-                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-yellow-500 transition-colors text-white [color-scheme:dark]" 
-                                    />
-                                    <p className="text-xs text-white/30 mt-2">Geri sayım yapılacak tarihi ve saati seçin.</p>
-                                  </div>
-                                </div>
-                              )}
-
-                              {w.type === 'worldclock' && (
-                                <div className="space-y-4">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Şehir Seti</label>
-                                    <select 
-                                      value={w.settings?.citySet || 'default'} 
-                                      onChange={(e) => {
-                                        const sets = {
-                                          default: [
-                                            { name: 'NEW YORK', tz: 'America/New_York' },
-                                            { name: 'LONDRA', tz: 'Europe/London' },
-                                            { name: 'TOKYO', tz: 'Asia/Tokyo' }
-                                          ],
-                                          europe: [
-                                            { name: 'İSTANBUL', tz: 'Europe/Istanbul' },
-                                            { name: 'BERLİN', tz: 'Europe/Berlin' },
-                                            { name: 'PARİS', tz: 'Europe/Paris' }
-                                          ],
-                                          asia: [
-                                            { name: 'TOKYO', tz: 'Asia/Tokyo' },
-                                            { name: 'SEUL', tz: 'Asia/Seoul' },
-                                            { name: 'SİNGAPUR', tz: 'Asia/Singapore' }
-                                          ],
-                                          americas: [
-                                            { name: 'NEW YORK', tz: 'America/New_York' },
-                                            { name: 'LOS ANGELES', tz: 'America/Los_Angeles' },
-                                            { name: 'SAO PAULO', tz: 'America/Sao_Paulo' }
-                                          ]
-                                        }
-                                        updateSetting(w.id, 'citySet', e.target.value)
-                                        updateSetting(w.id, 'cities', sets[e.target.value])
-                                      }} 
-                                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-indigo-500 transition-colors"
-                                    >
-                                      <option value="default">🌎 Küresel (NY, Londra, Tokyo)</option>
-                                      <option value="europe">🇪🇺 Avrupa (İstanbul, Berlin, Paris)</option>
-                                      <option value="asia">🌏 Asya (Tokyo, Seul, Singapur)</option>
-                                      <option value="americas">🌎 Amerikalar (NY, LA, Sao Paulo)</option>
-                                    </select>
-                                  </div>
-                                </div>
-                              )}
-
-                              {w.type === 'shortcuts' && (
-                                <div className="space-y-3">
-                                  <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Hızlı Kısayollar</label>
-                                  <p className="text-xs text-white/30 mb-3">Masaüstünüzde tek tıkla açılacak web sitelerini düzenleyin.</p>
-                                  {(w.settings?.customShortcuts || [
-                                    { name: 'Google', url: 'https://google.com', icon: 'G' },
-                                    { name: 'YouTube', url: 'https://youtube.com', icon: 'Y' },
-                                    { name: 'GitHub', url: 'https://github.com', icon: 'GH' },
-                                    { name: 'ChatGPT', url: 'https://chat.openai.com', icon: 'AI' }
-                                  ]).map((sc, idx) => (
-                                    <div key={idx} className="grid grid-cols-[60px_1fr_1fr] gap-2">
-                                      <input 
-                                        type="text" 
-                                        value={sc.icon} 
-                                        onChange={e => {
-                                          const arr = [...(w.settings?.customShortcuts || [
-                                            { name: 'Google', url: 'https://google.com', icon: 'G' },
-                                            { name: 'YouTube', url: 'https://youtube.com', icon: 'Y' },
-                                            { name: 'GitHub', url: 'https://github.com', icon: 'GH' },
-                                            { name: 'ChatGPT', url: 'https://chat.openai.com', icon: 'AI' }
-                                          ])]
-                                          arr[idx] = { ...arr[idx], icon: e.target.value }
-                                          updateSetting(w.id, 'customShortcuts', arr)
-                                        }} 
-                                        className="bg-black/40 border border-white/10 rounded-lg p-2 text-xs text-center outline-none focus:border-purple-500" 
-                                        placeholder="İkon"
-                                      />
-                                      <input 
-                                        type="text" 
-                                        value={sc.name} 
-                                        onChange={e => {
-                                          const arr = [...(w.settings?.customShortcuts || [
-                                            { name: 'Google', url: 'https://google.com', icon: 'G' },
-                                            { name: 'YouTube', url: 'https://youtube.com', icon: 'Y' },
-                                            { name: 'GitHub', url: 'https://github.com', icon: 'GH' },
-                                            { name: 'ChatGPT', url: 'https://chat.openai.com', icon: 'AI' }
-                                          ])]
-                                          arr[idx] = { ...arr[idx], name: e.target.value }
-                                          updateSetting(w.id, 'customShortcuts', arr)
-                                        }} 
-                                        className="bg-black/40 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" 
-                                        placeholder="İsim"
-                                      />
-                                      <input 
-                                        type="text" 
-                                        value={sc.url} 
-                                        onChange={e => {
-                                          const arr = [...(w.settings?.customShortcuts || [
-                                            { name: 'Google', url: 'https://google.com', icon: 'G' },
-                                            { name: 'YouTube', url: 'https://youtube.com', icon: 'Y' },
-                                            { name: 'GitHub', url: 'https://github.com', icon: 'GH' },
-                                            { name: 'ChatGPT', url: 'https://chat.openai.com', icon: 'AI' }
-                                          ])]
-                                          arr[idx] = { ...arr[idx], url: e.target.value }
-                                          updateSetting(w.id, 'customShortcuts', arr)
-                                        }} 
-                                        className="bg-black/40 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" 
-                                        placeholder="https://..."
-                                      />
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-
-                              {w.type === 'smart' && (
-                                <div className="space-y-5">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Widget Görevi</label>
-                                    <select value={w.settings?.smartType || 'text'} onChange={(e) => updateSetting(w.id, 'smartType', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-blue-500 transition-colors">
-                                      <option value="text">Statik Metin</option>
-                                      <option value="image">Statik Görsel</option>
-                                      <option value="api">Dinamik API Verisi</option>
-                                    </select>
-                                  </div>
-                                  
-                                  {w.settings?.smartType === 'api' && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
-                                      <div className="md:col-span-2">
-                                        <label className="block text-xs font-semibold text-white/50 uppercase mb-2">API URL (GET)</label>
-                                        <input type="text" value={w.settings?.apiUrl || ''} onChange={e => updateSetting(w.id, 'apiUrl', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500" placeholder="https://api.ornek.com/veri" />
-                                      </div>
-                                      <div>
-                                        <label className="block text-xs font-semibold text-white/50 uppercase mb-2">JSON Veri Yolu</label>
-                                        <input type="text" value={w.settings?.jsonPath || ''} onChange={e => updateSetting(w.id, 'jsonPath', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500" placeholder="data.price" />
-                                      </div>
-                                      <div>
-                                        <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Yenilenme Hızı</label>
-                                        <select value={w.settings?.refreshRate || 60000} onChange={e => updateSetting(w.id, 'refreshRate', parseInt(e.target.value))} className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500">
-                                          <option value="10000">10 Saniye</option>
-                                          <option value="60000">1 Dakika</option>
-                                        </select>
-                                      </div>
-                                    </div>
-                                  )}
-                                  
-                                  {/* Diğer smart inputs... */}
-                                </div>
-                              )}
-
-                              {w.type === 'custom' && (
-                                <div>
-                                  <label className="block text-xs font-semibold text-white/50 uppercase mb-2">HTML / CSS / JS Kodu</label>
-                                  <textarea value={w.settings?.htmlContent || ''} onChange={(e) => updateSetting(w.id, 'htmlContent', e.target.value)} className="w-full h-48 bg-[#0a0a0a] text-green-400 font-mono text-sm border border-white/10 rounded-xl p-4 outline-none resize-y focus:border-blue-500 transition-colors mb-4" spellCheck="false" />
-                                  <button onClick={() => publishWidget(w)} className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-bold hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all flex items-center justify-center gap-2">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                    Tüm Dünyayla Paylaş (Bulut Mağazaya Yayınla)
-                                  </button>
-                                </div>
-                              )}
-
-                            </div>
-                         )}
-
-                         {/* === GÖRÜNÜM AYARLARI === */}
-                         {activeTab === 'appearance' && (
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl">
-                              <div className="md:col-span-2 p-5 bg-black/20 border border-white/5 rounded-2xl flex items-center justify-between backdrop-blur-xl">
-                                  <div>
-                                    <h4 className="font-bold text-white text-lg">Şeffaf Mod (Ultimate Freedom)</h4>
-                                    <p className="text-white/50 text-sm">Arka planı, cam efektini ve çerçeveyi tamamen kapatır. Masaüstünüzde sadece yazı veya objeler kalır.</p>
-                                  </div>
-                                  <button 
-                                    onClick={() => updateSetting(w.id, 'isTransparent', !w.settings?.isTransparent)}
-                                    className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${w.settings?.isTransparent ? 'bg-blue-500' : 'bg-white/10'}`}
-                                  >
-                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm ${w.settings?.isTransparent ? 'translate-x-8' : 'translate-x-1'}`} />
-                                  </button>
+                         <div className="p-6 bg-black/10 min-h-[400px]">
+                           {/* === KOD AYARLARI (SADECE CUSTOM) === */}
+                           {activeTab === 'code' && w.type === 'custom' && (
+                             <div className="space-y-4">
+                               <div>
+                                 <label className="block text-xs font-semibold text-white/50 uppercase mb-3">Özel HTML / CSS Kodları</label>
+                                 <textarea
+                                   className="w-full h-48 bg-black/40 border border-green-500/30 rounded-xl p-4 text-sm font-mono text-green-400 focus:border-green-500 outline-none"
+                                   value={w.settings.htmlContent || ""}
+                                   onChange={(e) => updateSetting(w.id, 'htmlContent', e.target.value)}
+                                 ></textarea>
+                                 <p className="text-xs text-white/40 mt-2 mb-4">İpucu: Neon renklerini değiştirmek için CSS içindeki HEX kodlarını (örn: #0ff) düzenleyebilirsiniz.</p>
+                                 <button onClick={() => publishWidget(w)} className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-bold hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all flex items-center justify-center gap-2">
+                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                   Tüm Dünyayla Paylaş (Bulut Mağazaya Yayınla)
+                                 </button>
                                </div>
-                              
-                              <div className={`space-y-6 transition-opacity ${w.settings?.isTransparent ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
-                                <div>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Büyüklük (Scale)</span><span className="text-white">{w.settings?.scale || 1.0}x</span></div>
-                                  <input type="range" min="0.5" max="3.0" step="0.1" value={w.settings?.scale || 1.0} onChange={(e) => updateSetting(w.id, 'scale', parseFloat(e.target.value))} className="w-full accent-white" />
-                                </div>
-                                <div>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Arkaplan Koyuluğu (Opacity)</span><span className="text-white">{Math.round((w.settings?.opacity ?? 0.4) * 100)}%</span></div>
-                                  <input type="range" min="0.0" max="1.0" step="0.05" value={w.settings?.opacity ?? 0.4} onChange={(e) => updateSetting(w.id, 'opacity', parseFloat(e.target.value))} className="w-full accent-white" />
-                                </div>
-                                <div>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Özel Arkaplan Rengi</span><span className="text-white">{w.settings?.bgColorHex || '#000000'}</span></div>
-                                  <div className="flex gap-4 items-center">
-                                    <input type="color" value={w.settings?.bgColorHex || '#000000'} onChange={(e) => updateSetting(w.id, 'bgColorHex', e.target.value)} className="w-10 h-10 rounded-xl cursor-pointer bg-transparent border-0" />
-                                    <span className="text-sm text-white/50">Widget'ın temel arka plan rengini değiştirir.</span>
-                                  </div>
-                                </div>
-                              </div>
+                             </div>
+                           )}
 
-                              <div className={`space-y-6 transition-opacity ${w.settings?.isTransparent ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
-                                <div>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Bulanıklık (Blur)</span><span className="text-white">{w.settings?.blur ?? 24}px</span></div>
-                                  <input type="range" min="0" max="50" step="1" value={w.settings?.blur ?? 24} onChange={(e) => updateSetting(w.id, 'blur', parseInt(e.target.value))} className="w-full accent-white" />
-                                </div>
-                                <div>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Köşe Yuvarlaklığı (Radius)</span><span className="text-white">{w.settings?.radius ?? 32}px</span></div>
-                                  <input type="range" min="0" max="100" step="2" value={w.settings?.radius ?? 32} onChange={(e) => updateSetting(w.id, 'radius', parseInt(e.target.value))} className="w-full accent-white" />
-                                </div>
-                              </div>
-                              
-                              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-white/5">
-                                <div>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Genişlik (Width)</span><span className="text-white">{w.settings?.width || 300}px</span></div>
-                                  <input type="range" min="100" max="1200" step="10" value={w.settings?.width || 300} onChange={(e) => updateSetting(w.id, 'width', parseInt(e.target.value))} className="w-full accent-blue-500" />
-                                </div>
-                                <div>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Yükseklik (Height)</span><span className="text-white">{w.settings?.height || 200}px</span></div>
-                                  <input type="range" min="100" max="1200" step="10" value={w.settings?.height || 200} onChange={(e) => updateSetting(w.id, 'height', parseInt(e.target.value))} className="w-full accent-blue-500" />
-                                </div>
-                                <div className={`transition-opacity ${w.settings?.isTransparent ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
-                                  <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>İç Boşluk (Padding)</span><span className="text-white">{w.settings?.padding ?? 24}px</span></div>
-                                  <input type="range" min="0" max="100" step="2" value={w.settings?.padding ?? 24} onChange={(e) => updateSetting(w.id, 'padding', parseInt(e.target.value))} className="w-full accent-green-500" />
-                                </div>
-                              </div>
+                           {/* === TEMEL AYARLAR === */}
+                           {activeTab === 'basic' && (
+                             <div className="space-y-6 max-w-2xl">
+                               {w.type !== 'custom' && w.type !== 'smart' && w.type !== 'notes' && (
+                                 <div>
+                                   <label className="block text-xs font-semibold text-white/50 uppercase mb-3">Vurgu Rengi</label>
+                                   <div className="flex gap-3">
+                                     {Object.keys(colorMap).map(color => (
+                                       <button
+                                         key={color}
+                                         onClick={() => updateSetting(w.id, 'color', color)}
+                                         className={`w-8 h-8 rounded-full border-[3px] transition-transform ${w.settings?.color === color ? 'border-white scale-110 shadow-lg' : 'border-transparent opacity-50 hover:opacity-100'} ${colorMap[color].split(' ')[0]}`}
+                                       />
+                                     ))}
+                                   </div>
+                                 </div>
+                               )}
 
-                           </div>
-                         )}
+                               {w.type === 'crypto' && (
+                                 <div>
+                                   <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Kripto Para Birimi</label>
+                                   <select value={w.settings?.coin || 'solana'} onChange={(e) => updateSetting(w.id, 'coin', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-blue-500 transition-colors">
+                                     <option value="bitcoin">Bitcoin (BTC)</option>
+                                     <option value="ethereum">Ethereum (ETH)</option>
+                                     <option value="solana">Solana (SOL)</option>
+                                     <option value="dogecoin">Dogecoin (DOGE)</option>
+                                   </select>
+                                 </div>
+                               )}
 
+                               {w.type === 'weather' && (
+                                 <div className="grid grid-cols-2 gap-4">
+                                   <div className="col-span-2">
+                                     <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Şehir / Konum (Örn: Istanbul)</label>
+                                     <select 
+                                       value={`${w.settings?.lat || '41.0082'},${w.settings?.lon || '28.9784'}`} 
+                                       onChange={(e) => {
+                                         const [lat, lon] = e.target.value.split(',')
+                                         updateSetting(w.id, 'lat', lat)
+                                         updateSetting(w.id, 'lon', lon)
+                                       }} 
+                                       className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-blue-500 transition-colors"
+                                     >
+                                       <option value="41.0082,28.9784">İstanbul</option>
+                                       <option value="39.9208,32.8541">Ankara</option>
+                                       <option value="38.4237,27.1428">İzmir</option>
+                                       <option value="40.7128,-74.0060">New York</option>
+                                       <option value="51.5074,-0.1278">Londra</option>
+                                       <option value="35.6762,139.6503">Tokyo</option>
+                                     </select>
+                                   </div>
+                                 </div>
+                               )}
+
+                               {w.type === 'github' && (
+                                 <div className="space-y-4">
+                                   <div>
+                                     <label className="block text-xs font-semibold text-white/50 uppercase mb-2">GitHub Kullanıcı Adı</label>
+                                     <input 
+                                       type="text" 
+                                       value={w.settings?.githubUser || ''} 
+                                       onChange={e => updateSetting(w.id, 'githubUser', e.target.value)} 
+                                       className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-emerald-500 transition-colors" 
+                                       placeholder="torvalds" 
+                                     />
+                                     <p className="text-xs text-white/30 mt-2">Commit haritasını görmek istediğiniz GitHub kullanıcı adını girin.</p>
+                                   </div>
+                                 </div>
+                               )}
+
+                               {w.type === 'news' && (
+                                 <div className="space-y-4">
+                                   <div>
+                                     <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Haber Kategorisi</label>
+                                     <select 
+                                       value={w.settings?.newsCategory || 'technology'} 
+                                       onChange={(e) => updateSetting(w.id, 'newsCategory', e.target.value)} 
+                                       className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-red-500 transition-colors"
+                                     >
+                                       <option value="technology">🖥️ Teknoloji</option>
+                                       <option value="world">🌍 Dünya</option>
+                                     </select>
+                                   </div>
+                                   <div>
+                                     <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Haber Geçiş Hızı</label>
+                                     <select 
+                                       value={w.settings?.scrollSpeed || 8000} 
+                                       onChange={(e) => updateSetting(w.id, 'scrollSpeed', parseInt(e.target.value))} 
+                                       className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-red-500 transition-colors"
+                                     >
+                                       <option value="5000">5 Saniye (Hızlı)</option>
+                                       <option value="8000">8 Saniye (Normal)</option>
+                                       <option value="15000">15 Saniye (Yavaş)</option>
+                                     </select>
+                                   </div>
+                                 </div>
+                               )}
+
+                               {w.type === 'countdown' && (
+                                 <div className="space-y-4">
+                                   <div>
+                                     <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Etkinlik Adı</label>
+                                     <input 
+                                       type="text" 
+                                       value={w.settings?.countdownTitle || ''} 
+                                       onChange={e => updateSetting(w.id, 'countdownTitle', e.target.value)} 
+                                       className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-yellow-500 transition-colors" 
+                                       placeholder="Yeni Yıl" 
+                                     />
+                                   </div>
+                                   <div>
+                                     <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Hedef Tarih</label>
+                                     <input 
+                                       type="datetime-local" 
+                                       value={w.settings?.targetDate || ''} 
+                                       onChange={e => updateSetting(w.id, 'targetDate', e.target.value)} 
+                                       className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-yellow-500 transition-colors text-white [color-scheme:dark]" 
+                                     />
+                                     <p className="text-xs text-white/30 mt-2">Geri sayım yapılacak tarihi ve saati seçin.</p>
+                                   </div>
+                                 </div>
+                               )}
+
+                               {w.type === 'worldclock' && (
+                                 <div className="space-y-4">
+                                   <div>
+                                     <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Şehir Seti</label>
+                                     <select 
+                                       value={w.settings?.citySet || 'default'} 
+                                       onChange={(e) => {
+                                         const sets = {
+                                           default: [
+                                             { name: 'NEW YORK', tz: 'America/New_York' },
+                                             { name: 'LONDRA', tz: 'Europe/London' },
+                                             { name: 'TOKYO', tz: 'Asia/Tokyo' }
+                                           ],
+                                           europe: [
+                                             { name: 'İSTANBUL', tz: 'Europe/Istanbul' },
+                                             { name: 'BERLİN', tz: 'Europe/Berlin' },
+                                             { name: 'PARİS', tz: 'Europe/Paris' }
+                                           ],
+                                           asia: [
+                                             { name: 'TOKYO', tz: 'Asia/Tokyo' },
+                                             { name: 'SEUL', tz: 'Asia/Seoul' },
+                                             { name: 'SİNGAPUR', tz: 'Asia/Singapore' }
+                                           ],
+                                           americas: [
+                                             { name: 'NEW YORK', tz: 'America/New_York' },
+                                             { name: 'LOS ANGELES', tz: 'America/Los_Angeles' },
+                                             { name: 'SAO PAULO', tz: 'America/Sao_Paulo' }
+                                           ]
+                                         }
+                                         updateSetting(w.id, 'citySet', e.target.value)
+                                         updateSetting(w.id, 'cities', sets[e.target.value])
+                                       }} 
+                                       className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-indigo-500 transition-colors"
+                                     >
+                                       <option value="default">🌎 Küresel (NY, Londra, Tokyo)</option>
+                                       <option value="europe">🇪🇺 Avrupa (İstanbul, Berlin, Paris)</option>
+                                       <option value="asia">🌏 Asya (Tokyo, Seul, Singapur)</option>
+                                       <option value="americas">🌎 Amerikalar (NY, LA, Sao Paulo)</option>
+                                     </select>
+                                   </div>
+                                 </div>
+                               )}
+
+                               {w.type === 'shortcuts' && (() => {
+                                 const defaultShortcuts = [
+                                   { name: 'Google', url: 'https://google.com', icon: 'G' },
+                                   { name: 'YouTube', url: 'https://youtube.com', icon: 'Y' },
+                                   { name: 'GitHub', url: 'https://github.com', icon: 'GH' },
+                                   { name: 'ChatGPT', url: 'https://chat.openai.com', icon: 'AI' }
+                                 ];
+                                 const currentShortcuts = w.settings?.customShortcuts || JSON.parse(JSON.stringify(defaultShortcuts));
+                                 return (
+                                   <div className="space-y-3">
+                                     <label className="block text-xs font-semibold text-white/50 uppercase mb-2">Hızlı Kısayollar</label>
+                                     <p className="text-xs text-white/30 mb-3">Masaüstünüzde tek tıkla açılacak web sitelerini düzenleyin.</p>
+                                     {currentShortcuts.map((sc, idx) => (
+                                       <div key={idx} className="grid grid-cols-[60px_1fr_1fr] gap-2">
+                                         <input 
+                                           type="text" 
+                                           value={sc.icon} 
+                                           onChange={e => {
+                                             const arr = [...currentShortcuts]
+                                             arr[idx] = { ...arr[idx], icon: e.target.value }
+                                             updateSetting(w.id, 'customShortcuts', arr)
+                                           }} 
+                                           className="bg-black/40 border border-white/10 rounded-lg p-2 text-xs text-center outline-none focus:border-purple-500" 
+                                           placeholder="İkon"
+                                         />
+                                         <input 
+                                           type="text" 
+                                           value={sc.name} 
+                                           onChange={e => {
+                                             const arr = [...currentShortcuts]
+                                             arr[idx] = { ...arr[idx], name: e.target.value }
+                                             updateSetting(w.id, 'customShortcuts', arr)
+                                           }} 
+                                           className="bg-black/40 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" 
+                                           placeholder="İsim"
+                                         />
+                                         <input 
+                                           type="text" 
+                                           value={sc.url} 
+                                           onChange={e => {
+                                             const arr = [...currentShortcuts]
+                                             arr[idx] = { ...arr[idx], url: e.target.value }
+                                             updateSetting(w.id, 'customShortcuts', arr)
+                                           }} 
+                                           className="bg-black/40 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" 
+                                           placeholder="https://..."
+                                         />
+                                       </div>
+                                     ))}
+                                   </div>
+                                 );
+                               })()}
+                             </div>
+                           )}
+
+                           {/* === GÖRÜNÜM AYARLARI === */}
+                           {activeTab === 'appearance' && (
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl">
+                               <div className="md:col-span-2 p-5 bg-black/20 border border-white/5 rounded-2xl flex items-center justify-between backdrop-blur-xl">
+                                   <div>
+                                     <h4 className="font-bold text-white text-lg">Şeffaf Mod (Ultimate Freedom)</h4>
+                                     <p className="text-white/50 text-sm">Arka planı, cam efektini ve çerçeveyi tamamen kapatır. Masaüstünüzde sadece yazı veya objeler kalır.</p>
+                                   </div>
+                                   <button 
+                                     onClick={() => updateSetting(w.id, 'isTransparent', !w.settings?.isTransparent)}
+                                     className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${w.settings?.isTransparent ? 'bg-blue-500' : 'bg-white/10'}`}
+                                   >
+                                     <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm ${w.settings?.isTransparent ? 'translate-x-8' : 'translate-x-1'}`} />
+                                   </button>
+                                </div>
+                               
+                               <div className={`space-y-6 transition-opacity ${w.settings?.isTransparent ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
+                                 <div>
+                                   <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Büyüklük (Scale)</span><span className="text-white">{w.settings?.scale || 1.0}x</span></div>
+                                   <input type="range" min="0.5" max="3.0" step="0.1" value={w.settings?.scale || 1.0} onChange={(e) => updateSetting(w.id, 'scale', parseFloat(e.target.value))} className="w-full accent-white" />
+                                 </div>
+                                 <div>
+                                   <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Arkaplan Koyuluğu (Opacity)</span><span className="text-white">{Math.round((w.settings?.opacity ?? 0.4) * 100)}%</span></div>
+                                   <input type="range" min="0.0" max="1.0" step="0.05" value={w.settings?.opacity ?? 0.4} onChange={(e) => updateSetting(w.id, 'opacity', parseFloat(e.target.value))} className="w-full accent-white" />
+                                 </div>
+                                 <div>
+                                   <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Özel Arkaplan Rengi</span><span className="text-white">{w.settings?.bgColorHex || '#000000'}</span></div>
+                                   <div className="flex gap-4 items-center">
+                                     <input type="color" value={w.settings?.bgColorHex || '#000000'} onChange={(e) => updateSetting(w.id, 'bgColorHex', e.target.value)} className="w-10 h-10 rounded-xl cursor-pointer bg-transparent border-0" />
+                                     <span className="text-sm text-white/50">Widget'ın temel arka plan rengini değiştirir.</span>
+                                   </div>
+                                 </div>
+                               </div>
+
+                               <div className={`space-y-6 transition-opacity ${w.settings?.isTransparent ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
+                                 <div>
+                                   <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Bulanıklık (Blur)</span><span className="text-white">{w.settings?.blur ?? 24}px</span></div>
+                                   <input type="range" min="0" max="50" step="1" value={w.settings?.blur ?? 24} onChange={(e) => updateSetting(w.id, 'blur', parseInt(e.target.value))} className="w-full accent-white" />
+                                 </div>
+                                 <div>
+                                   <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Köşe Yuvarlaklığı (Radius)</span><span className="text-white">{w.settings?.radius ?? 32}px</span></div>
+                                   <input type="range" min="0" max="100" step="2" value={w.settings?.radius ?? 32} onChange={(e) => updateSetting(w.id, 'radius', parseInt(e.target.value))} className="w-full accent-white" />
+                                 </div>
+                               </div>
+                               
+                               <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-white/5">
+                                 <div>
+                                   <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Genişlik (Width)</span><span className="text-white">{w.settings?.width || 300}px</span></div>
+                                   <input type="range" min="100" max="1200" step="10" value={w.settings?.width || 300} onChange={(e) => updateSetting(w.id, 'width', parseInt(e.target.value))} className="w-full accent-blue-500" />
+                                 </div>
+                                 <div>
+                                   <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>Yükseklik (Height)</span><span className="text-white">{w.settings?.height || 200}px</span></div>
+                                   <input type="range" min="100" max="1200" step="10" value={w.settings?.height || 200} onChange={(e) => updateSetting(w.id, 'height', parseInt(e.target.value))} className="w-full accent-blue-500" />
+                                 </div>
+                                 <div className={`transition-opacity ${w.settings?.isTransparent ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
+                                   <div className="flex justify-between text-xs font-semibold text-white/50 uppercase mb-3"><span>İç Boşluk (Padding)</span><span className="text-white">{w.settings?.padding ?? 24}px</span></div>
+                                   <input type="range" min="0" max="100" step="2" value={w.settings?.padding ?? 24} onChange={(e) => updateSetting(w.id, 'padding', parseInt(e.target.value))} className="w-full accent-green-500" />
+                                 </div>
+                               </div>
+                             </div>
+                           )}
+                         </div>
+                       </div>
+                       
+                       {/* Live Preview Right Side */}
+                       <div className="hidden lg:block w-[400px] xl:w-[500px] bg-black/20 p-4 relative border-l border-white/5">
+                         <LivePreview widget={w} />
                        </div>
                      </div>
                    )}

@@ -24,7 +24,7 @@ export default function StockWidget({ settings }) {
     }, 2000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [settings.basePrice, settings.stockSymbol])
 
   const isPositive = change >= 0
   const colorClass = isPositive ? 'text-green-400' : 'text-red-400'
