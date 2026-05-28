@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import useStore from '../store/useStore'
 import ClockWidget from '../widgets/ClockWidget'
 import SysmonWidget from '../widgets/SysmonWidget'
 import CryptoWidget from '../widgets/CryptoWidget'
@@ -21,52 +22,41 @@ import CountdownWidget from '../widgets/CountdownWidget'
 import WorldClockWidget from '../widgets/WorldClockWidget'
 
 const widgetMap = {
-  clock: ClockWidget,
-  sysmon: SysmonWidget,
-  crypto: CryptoWidget,
-  weather: WeatherWidget,
-  notes: NotesWidget,
-  pomodoro: PomodoroWidget,
-  custom: CustomWidget,
-  smart: SmartWidget,
-  hardware: HardwareWidget,
-  media: MediaWidget,
-  ai: AiWidget,
-  threed: ThreeDWidget,
-  stock: StockWidget,
-  github: GithubWidget,
-  calendar: CalendarWidget,
-  news: NewsWidget,
-  shortcuts: ShortcutsWidget,
-  countdown: CountdownWidget,
+  clock: ClockWidget, sysmon: SysmonWidget, crypto: CryptoWidget,
+  weather: WeatherWidget, notes: NotesWidget, pomodoro: PomodoroWidget,
+  custom: CustomWidget, smart: SmartWidget, hardware: HardwareWidget,
+  media: MediaWidget, ai: AiWidget, threed: ThreeDWidget,
+  stock: StockWidget, github: GithubWidget, calendar: CalendarWidget,
+  news: NewsWidget, shortcuts: ShortcutsWidget, countdown: CountdownWidget,
   worldclock: WorldClockWidget
 }
 
 export default function WidgetLayer() {
-  const [config, setConfig] = useState({ widgets: [] })
+  const { config, setConfig, updateWidgetPosition, updateWidgetSettings, appContext, setAppContext } = useStore()
   const [isExposed, setIsExposed] = useState(false)
-  const [appContext, setAppContext] = useState('normal')
   const [showContextEffect, setShowContextEffect] = useState(false)
   
   useEffect(() => {
+    // Initial load from main process
     if (window.electronAPI) {
       window.electronAPI.getConfig().then(setConfig)
     }
+
+    // IPC Listeners
     const removeListener = window.electronAPI?.onConfigUpdated?.((newConfig) => {
-      setConfig(newConfig)
+      // Sadece Store'a yaz (SaveConfig loop'u engellemek için)
+      useStore.setState({ config: newConfig })
     })
-    const removeExposeListener = window.electronAPI?.onExposeToggled?.((exposed) => {
-      setIsExposed(exposed);
-    });
+    const removeExposeListener = window.electronAPI?.onExposeToggled?.((exposed) => setIsExposed(exposed))
     const removeContextListener = window.electronAPI?.onContextChanged?.((ctx) => {
-      setAppContext(ctx);
+      setAppContext(ctx)
       if (ctx !== 'normal') {
-         setShowContextEffect(true);
-         setTimeout(() => setShowContextEffect(false), 3000);
+         setShowContextEffect(true)
+         setTimeout(() => setShowContextEffect(false), 3000)
       } else {
-         setShowContextEffect(false);
+         setShowContextEffect(false)
       }
-    });
+    })
 
     return () => {
        if(removeListener) removeListener()
@@ -74,26 +64,6 @@ export default function WidgetLayer() {
        if(removeContextListener) removeContextListener()
     }
   }, [])
-
-  const updatePosition = (id, x, y) => {
-    const newConfig = { ...config }
-    const widget = newConfig.widgets.find(w => w.id === id)
-    if (widget) {
-      widget.position = { x, y }
-      setConfig(newConfig)
-      if (window.electronAPI) window.electronAPI.saveConfig(newConfig)
-    }
-  }
-  
-  const updateSettings = (id, newSettings) => {
-    const newConfig = { ...config }
-    const widget = newConfig.widgets.find(w => w.id === id)
-    if (widget) {
-      widget.settings = { ...widget.settings, ...newSettings }
-      setConfig(newConfig)
-      if (window.electronAPI) window.electronAPI.saveConfig(newConfig)
-    }
-  }
 
   return (
     <div className={`w-screen h-screen relative overflow-hidden transition-all duration-1000 pointer-events-none ${isExposed ? 'bg-black/80 backdrop-blur-md' : 'bg-transparent'}`}>
@@ -127,16 +97,9 @@ export default function WidgetLayer() {
 
       <AnimatePresence>
         {config?.widgets?.filter(widget => {
-           // İşlevsel Smart Context: Gereksiz widget'ları bağlama göre gizle
-           if (appContext === 'gaming') {
-              // Oyun modunda sadece performans, donanım ve kripto kalsın. Müzik, saat, notlar vs. gizlensin.
-              return ['hardware', 'sysmon', 'crypto', 'media'].includes(widget.type);
-           }
-           if (appContext === 'developer') {
-              // Geliştirici modunda saat, notlar, pomodoro, sysmon ve özel kodlar kalsın.
-              return ['notes', 'pomodoro', 'clock', 'sysmon', 'custom', 'smart'].includes(widget.type);
-           }
-           return true; // Normal modda hepsi görünür
+           if (appContext === 'gaming') return ['hardware', 'sysmon', 'crypto', 'media'].includes(widget.type);
+           if (appContext === 'developer') return ['notes', 'pomodoro', 'clock', 'sysmon', 'custom', 'smart'].includes(widget.type);
+           return true; 
         }).map((widget) => {
           const WidgetComponent = widgetMap[widget.type]
           if (!WidgetComponent) return null
@@ -145,14 +108,15 @@ export default function WidgetLayer() {
             <DraggableWidget 
               key={widget.id} 
               widget={widget} 
-              updatePosition={updatePosition}
+              updatePosition={updateWidgetPosition}
+              updateSettings={updateWidgetSettings}
               isExposed={isExposed}
               appContext={appContext}
               showContextEffect={showContextEffect}
             >
               <WidgetComponent 
                 settings={widget.settings || {}} 
-                updateSettings={(newSettings) => updateSettings(widget.id, newSettings)}
+                updateSettings={(newSettings) => updateWidgetSettings(widget.id, newSettings)}
               />
             </DraggableWidget>
           )
@@ -162,21 +126,24 @@ export default function WidgetLayer() {
   )
 }
 
-function DraggableWidget({ widget, children, updatePosition, isExposed, appContext, showContextEffect }) {
+function DraggableWidget({ widget, children, updatePosition, updateSettings, isExposed, appContext, showContextEffect }) {
   const settings = widget.settings || {}
   const scale = settings.scale || 1.0;
   const isTransparent = widget.type === 'threed' || settings.isTransparent === true;
   
+  const isDragging = useRef(false)
+  const isResizing = useRef(false)
+
   // Context'e göre belirgin parlamalar (Sadece ilk 3 saniye görünür)
   let contextGlow = 'none';
   let contextBorder = settings.borderColor || 'rgba(255,255,255,0.1)';
   
   if (showContextEffect && !isTransparent) {
     if (appContext === 'gaming') {
-       contextBorder = 'rgba(239, 68, 68, 0.8)'; // Kırmızı
+       contextBorder = 'rgba(239, 68, 68, 0.8)';
        contextGlow = '0 0 40px rgba(239, 68, 68, 0.5), inset 0 0 20px rgba(239, 68, 68, 0.2)';
     } else if (appContext === 'developer') {
-       contextBorder = 'rgba(34, 197, 94, 0.8)'; // Yeşil
+       contextBorder = 'rgba(34, 197, 94, 0.8)';
        contextGlow = '0 0 40px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.2)';
     }
   }
@@ -199,15 +166,24 @@ function DraggableWidget({ widget, children, updatePosition, isExposed, appConte
 
   return (
     <motion.div 
-      drag
+      drag={!isResizing.current}
       dragMomentum={false}
+      onDragStart={() => isDragging.current = true}
       onDragEnd={(e, info) => {
+        setTimeout(() => isDragging.current = false, 150) // Drag sonrası click oluşmaması için ufak delay
         const snap = 20;
         const newX = widget.position.x + info.offset.x;
         const newY = widget.position.y + info.offset.y;
         const snappedX = Math.round(newX / snap) * snap;
         const snappedY = Math.round(newY / snap) * snap;
         updatePosition(widget.id, snappedX, snappedY);
+      }}
+      onClickCapture={(e) => {
+        // Eğer widget'ı sürüklüyorsak, içindeki butonlara/linklere tıklanmasını tamamen engelle.
+        if (isDragging.current) {
+          e.stopPropagation()
+          e.preventDefault()
+        }
       }}
       initial={{ opacity: 0, scale: 0.5, x: widget.position.x, y: widget.position.y + 50 }}
       animate={{ 
@@ -229,10 +205,55 @@ function DraggableWidget({ widget, children, updatePosition, isExposed, appConte
          <div className="absolute inset-0 bg-animated-gradient opacity-40 mix-blend-color-dodge pointer-events-none z-[-1]" 
               style={{ backgroundImage: 'linear-gradient(45deg, #ff00cc, #333399, #00ffcc, #ff9900)' }} />
       )}
+      
+      {/* Sürükleme handle'ı (Sadece görsel) */}
       <div className="absolute top-0 left-0 w-full h-8 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center -translate-y-4">
          <div className="w-12 h-1.5 bg-white/40 rounded-full mt-5 pointer-events-none"></div>
       </div>
+      
       {children}
+
+      {/* Yeniden Boyutlandırma (Resize) Handle */}
+      {!isTransparent && (
+        <div 
+          className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize flex items-end justify-end p-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-50"
+          onPointerDown={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            isResizing.current = true
+            
+            const startX = e.clientX
+            const startY = e.clientY
+            const startWidth = settings.width || 300
+            const startHeight = settings.height || 200
+            
+            const onPointerMove = (moveEvent) => {
+              const newWidth = Math.max(150, startWidth + (moveEvent.clientX - startX))
+              const newHeight = Math.max(100, startHeight + (moveEvent.clientY - startY))
+              
+              // Performans için geçici UI güncellemesi: DOM'a direkt müdahale
+              e.currentTarget.parentElement.style.width = `${newWidth}px`
+              e.currentTarget.parentElement.style.height = `${newHeight}px`
+            }
+            
+            const onPointerUp = (upEvent) => {
+              document.removeEventListener('pointermove', onPointerMove)
+              document.removeEventListener('pointerup', onPointerUp)
+              isResizing.current = false
+              
+              // Final kaydetme işlemi Zustand/Electron'a gider
+              const finalWidth = Math.max(150, startWidth + (upEvent.clientX - startX))
+              const finalHeight = Math.max(100, startHeight + (upEvent.clientY - startY))
+              updateSettings(widget.id, { width: finalWidth, height: finalHeight })
+            }
+            
+            document.addEventListener('pointermove', onPointerMove)
+            document.addEventListener('pointerup', onPointerUp)
+          }}
+        >
+          <svg className="w-3 h-3 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
+        </div>
+      )}
     </motion.div>
   )
 }
