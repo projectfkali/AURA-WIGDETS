@@ -80,13 +80,13 @@ export default function LivePreview({ widget }) {
       
       <AnimatePresence mode="wait">
         <motion.div
-          key={widget.id + '-' + JSON.stringify(s)} // Force re-render on setting change for animations
+          key={widget.id} // Sadece ID olmalı, JSON.stringify her slider değişiminde komponenti yok edip geri getirerek kaybolma bug'ı yaratıyordu.
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 1.1 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="relative flex flex-col z-10 liquid-glass-dark"
-          style={dynamicStyle}
+          className={`relative flex flex-col z-10 ${s.isTransparent ? '' : 'liquid-glass'}`}
+          style={{...dynamicStyle, transform: 'none'}} // Scale işlemi üst componentten (WidgetSettingsSidebar) yapılacak.
         >
           <div className="w-full h-full relative z-10">
             <Component widgetId={widget.id} settings={s} />
