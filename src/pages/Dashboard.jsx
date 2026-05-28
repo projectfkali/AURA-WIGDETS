@@ -625,7 +625,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
+        </div>
       </main>
 
       {/* iOS 26 / VisionOS Widget Settings Modal Overlay */}
