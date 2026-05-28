@@ -304,54 +304,15 @@ export default function Dashboard() {
         <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-purple-500/20 blur-[150px] rounded-full mix-blend-screen animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-            <p className="text-[10px] text-white/40 uppercase tracking-widest">Dashboard V2</p>
-          </div>
-        </div>
-
-        <nav className="flex-1 space-y-2">
-          <MenuItem 
-            id="gallery" 
-            label="Yerleşik Galeri" 
-            icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>} 
-          />
-          <MenuItem 
-            id="store" 
-            label="Aura Mağaza" 
-            badge="YENİ"
-            icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>} 
-          />
-          <MenuItem 
-            id="ai" 
-            label="Aura AI (Yapay Zeka)" 
-            icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>} 
-          />
-          <MenuItem 
-            id="active" 
-            label="Aktif Masaüstü" 
-            badge={config.widgets.length}
-            icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>} 
-          />
-          <MenuItem 
-            id="themes" 
-            label="Küresel Temalar" 
-            icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>} 
-          />
-          <MenuItem 
-            id="settings" 
-            label="Yedekleme & İçe Aktar" 
-            icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>} 
-          />
-        </nav>
-      </aside>
-
       {/* Main Content Area */}
-      <main className="flex-1 p-6 md:p-10 max-w-6xl overflow-y-auto z-10">
+      <main className="flex-1 p-6 md:p-10 max-w-6xl overflow-y-auto z-10 mx-auto w-full pt-28">
         
         {activeMenu === 'gallery' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 mt-6">
             <h2 className="text-4xl font-bold mb-2 tracking-tight">Widget Galerisi</h2>
             <p className="text-white/50 mb-10 text-lg">Masaüstünüzü kişiselleştirmek için modülleri seçin.</p>
             
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-[200px]">
               <GalleryBento title="Borsa Grafiği" desc="Canlı Hisse" onClick={() => addWidget('stock')} colSpan="md:col-span-2 lg:col-span-2" color="from-teal-500/20 to-green-500/5" icon="📈" />
               <GalleryBento title="GitHub Heatmap" desc="Commit Haritası" onClick={() => addWidget('github')} colSpan="md:col-span-2 lg:col-span-2" color="from-emerald-500/20 to-teal-500/5" icon="🐙" />
               <GalleryBento title="Haberler / RSS" desc="Son Dakika Akışı" onClick={() => addWidget('news')} colSpan="md:col-span-1 lg:col-span-2" color="from-red-500/20 to-orange-500/5" icon="📰" />
@@ -512,7 +473,12 @@ export default function Dashboard() {
                            }
                          }}
                          className="px-4 py-2 bg-blue-500/10 text-blue-400 font-medium rounded-lg hover:bg-blue-500/20 transition-colors text-sm"
-rounded-lg hover:bg-red-500/20 transition-colors text-sm"
+                       >
+                         {editingId === w.id ? 'Paneli Kapat' : 'Ayarlar'}
+                       </button>
+                       <button 
+                         onClick={() => removeWidget(w.id)}
+                         className="px-4 py-2 bg-red-500/10 text-red-400 font-medium rounded-lg hover:bg-red-500/20 transition-colors text-sm"
                        >
                          Sil
                        </button>
