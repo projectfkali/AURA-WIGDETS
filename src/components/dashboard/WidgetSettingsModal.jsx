@@ -145,6 +145,14 @@ const WidgetSettingsModal = memo(({ widget, updateSetting, closeModal, removeWid
                          <input type="range" min="0" max="100" step="2" value={s.radius ?? 32} onChange={e => updateSetting(widget.id, 'radius', parseInt(e.target.value))} className="ios-slider" />
                       </div>
 
+                      <div className={`ios-list-item px-6 py-4 transition-opacity duration-300 ${s.isTransparent ? 'opacity-30 pointer-events-none' : ''}`}>
+                         <div className="flex flex-col">
+                            <span className="text-white font-medium text-[16px]">Hareketli Degrade (Animasyon)</span>
+                            <span className="text-white/40 text-[13px]">Arkaplanda dönen canlı renk geçişleri.</span>
+                         </div>
+                         <input type="checkbox" className="ios-switch" checked={s.animatedGradient || false} onChange={e => updateSetting(widget.id, 'animatedGradient', e.target.checked)} />
+                      </div>
+
                       {widget.type !== 'custom' && widget.type !== 'smart' && widget.type !== 'notes' && (
                         <div className="ios-list-item flex-col items-start gap-4 px-6 py-4">
                            <span className="text-white font-medium text-[16px]">Tema Rengi</span>
@@ -209,7 +217,24 @@ const WidgetSettingsModal = memo(({ widget, updateSetting, closeModal, removeWid
                   className="space-y-8"
                 >
                   
-                  {widget.type === 'crypto' ? (
+                  {widget.type === 'ai' ? (
+                    <div>
+                      <span className="text-[14px] text-white/50 uppercase tracking-wider ml-2 block mb-3 font-bold">OpenAI API Bağlantısı</span>
+                      <div className="ios-inset-group">
+                        <div className="ios-list-item flex-col items-start gap-4 px-6 py-4">
+                          <span className="text-white font-medium text-[16px]">API Anahtarı (Secret Key)</span>
+                          <input 
+                            type="password" 
+                            value={s.aiApiKey || ''} 
+                            onChange={e => updateSetting(widget.id, 'aiApiKey', e.target.value)} 
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-5 py-3 text-white text-lg outline-none focus:border-blue-500 transition-colors shadow-inner"
+                            placeholder="sk-..."
+                          />
+                          <p className="text-white/40 text-[12px]">Bu alanı doldurduğunuzda AI Widget'ınız doğrudan ChatGPT (OpenAI) sunucularıyla konuşmaya başlar. Anahtarınız sadece bilgisayarınızda (yerel) saklanır.</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : widget.type === 'crypto' ? (
                     <div>
                       <span className="text-[14px] text-white/50 uppercase tracking-wider ml-2 block mb-3 font-bold">Kripto Market Verisi</span>
                       <div className="ios-inset-group">

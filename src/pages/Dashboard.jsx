@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import LivePreview from '../components/dashboard/LivePreview'
-import FloatingNav from '../components/dashboard/FloatingNav'
+import SidebarNav from '../components/dashboard/SidebarNav'
 import WidgetSettingsModal from '../components/dashboard/WidgetSettingsModal'
 import { nanoid } from 'nanoid'
 
@@ -35,14 +35,34 @@ export default function Dashboard() {
   useEffect(() => {
     if (activeMenu === 'store' && storeWidgets.length === 0) {
       setLoadingStore(true)
+      
+      const fallbackStoreWidgets = [
+        {
+          id: 'mock_1', name: 'Cyber Clock', author: 'Neo', downloads: 1250,
+          description: 'Cyberpunk temalı özel tasarım saat widgetı.',
+          htmlContent: '<div style="background:rgba(0,0,0,0.8);color:#a855f7;padding:20px;border-radius:16px;border:2px solid #a855f7;font-family:monospace;font-size:24px;text-align:center;">CYBER_TIME: <br/><span id="time">00:00:00</span></div><script>setInterval(() => document.getElementById("time").innerText = new Date().toLocaleTimeString(), 1000)</script>'
+        },
+        {
+          id: 'mock_2', name: 'Minimal Terminal', author: 'root', downloads: 890,
+          description: 'Hacker hissiyatı veren retro terminal ekranı.',
+          htmlContent: '<div style="background:#000;color:#4ade80;padding:20px;border-radius:8px;font-family:monospace;height:100%;width:100%;">user@aura:~$ ping 8.8.8.8<br/>64 bytes from 8.8.8.8: icmp_seq=1 ttl=115 time=14.3 ms<br/>user@aura:~$ _</div>'
+        },
+        {
+          id: 'mock_3', name: 'Neon Text', author: 'Aura', downloads: 3400,
+          description: 'Masaüstünüzü aydınlatacak neon parlayan metin.',
+          htmlContent: '<div style="display:flex;align-items:center;justify-content:center;height:100%;"><h1 style="color:#fff;text-shadow:0 0 10px #fff,0 0 20px #fff,0 0 40px #ff00de,0 0 80px #ff00de;font-family:sans-serif;">STAY FOCUSED</h1></div>'
+        }
+      ]
+
       fetch('https://jsonblob.com/api/jsonBlob/019e6603-2cb0-72ca-8ab7-2898eace8c5c')
         .then(res => res.json())
         .then(data => {
-          setStoreWidgets(data.widgets || [])
+          setStoreWidgets((data.widgets && data.widgets.length > 0) ? data.widgets : fallbackStoreWidgets)
           setLoadingStore(false)
         })
         .catch(err => {
           console.error("Store error:", err)
+          setStoreWidgets(fallbackStoreWidgets)
           setLoadingStore(false)
         })
     }
@@ -173,6 +193,9 @@ export default function Dashboard() {
     { id: 'dark', name: 'Dark Mode', color: 'bg-black/60' },
     { id: 'cyberpunk', name: 'Cyberpunk', color: 'bg-yellow-500/20', border: 'border-yellow-500' },
     { id: 'neon', name: 'Neon Purple', color: 'bg-purple-900/40', border: 'border-purple-500' },
+    { id: 'sunset', name: 'Sunset (Günbatımı)', color: 'bg-gradient-to-tr from-orange-500/30 to-pink-500/30', border: 'border-orange-400' },
+    { id: 'ocean', name: 'Ocean (Okyanus)', color: 'bg-gradient-to-tr from-cyan-500/30 to-blue-600/30', border: 'border-cyan-400' },
+    { id: 'aurora', name: 'Aurora (Kuzey Işıkları)', color: 'bg-gradient-to-tr from-green-400/30 to-blue-500/30', border: 'border-green-400' },
     { id: 'os', name: 'Sistem Teması (OS)', color: 'bg-gradient-to-br from-blue-500/20 to-purple-500/20', border: 'border-white/30' }
   ]
 
@@ -241,6 +264,25 @@ export default function Dashboard() {
         w.settings.radius = 16
         w.settings.borderWidth = 1
         w.settings.fontFamily = 'inherit'
+      } else if (theme === 'sunset') {
+        w.settings.color = 'white'
+        w.settings.blur = 24
+        w.settings.opacity = 0.5
+        w.settings.radius = 24
+        w.settings.bgColorHex = '#ff7b00'
+      } else if (theme === 'ocean') {
+        w.settings.color = 'white'
+        w.settings.blur = 32
+        w.settings.opacity = 0.4
+        w.settings.radius = 40
+        w.settings.bgColorHex = '#00aeff'
+      } else if (theme === 'aurora') {
+        w.settings.color = 'white'
+        w.settings.blur = 20
+        w.settings.opacity = 0.3
+        w.settings.radius = 32
+        w.settings.bgColorHex = '#00ff88'
+        w.settings.animatedGradient = true
       }
     })
     saveConfig(newConfig)
@@ -297,7 +339,8 @@ export default function Dashboard() {
   )
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden text-white font-sans bg-[#0a0a0a] selection:bg-white/30 relative">
+    <div className="flex flex-row h-screen overflow-hidden text-white font-sans bg-[#0a0a0a] selection:bg-white/30 relative">
+      <SidebarNav activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
       
       {/* Mesh Gradient Arkaplan */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -523,6 +566,30 @@ export default function Dashboard() {
                 </div>
                 <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">→</div>
               </div>
+
+              <div onClick={() => applyTheme('sunset')} className="group p-6 bg-gradient-to-r from-orange-500/10 to-pink-500/10 border border-orange-500/20 hover:border-orange-500/50 rounded-2xl cursor-pointer transition-all flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-orange-400 mb-1">Sunset (Günbatımı)</h3>
+                  <p className="text-orange-400/50 text-sm">Turuncu ve pembe tonlarıyla sıcak ve romantik bir masaüstü.</p>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">→</div>
+              </div>
+
+              <div onClick={() => applyTheme('ocean')} className="group p-6 bg-gradient-to-r from-cyan-500/10 to-blue-600/10 border border-cyan-500/20 hover:border-cyan-500/50 rounded-2xl cursor-pointer transition-all flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-cyan-400 mb-1">Ocean (Okyanus)</h3>
+                  <p className="text-cyan-400/50 text-sm">Derin deniz mavisi cam efektleri ve inanılmaz bir derinlik hissi.</p>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-cyan-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">→</div>
+              </div>
+
+              <div onClick={() => applyTheme('aurora')} className="group p-6 bg-gradient-to-r from-green-400/10 to-blue-500/10 border border-green-400/20 hover:border-green-400/50 rounded-2xl cursor-pointer transition-all flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-green-400 mb-1">Aurora (Animasyonlu K. Işıkları)</h3>
+                  <p className="text-green-400/50 text-sm">Widget arkaplanlarında hareketli degrade (gradient) animasyonları çalışır.</p>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">→</div>
+              </div>
             </div>
           </div>
         )}
@@ -559,13 +626,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        </div>
       </main>
-
-      {/* Strict Bottom Dock Area (Asla taşmaz) */}
-      <div className="shrink-0 w-full flex justify-center py-6 z-50 bg-black/20 backdrop-blur-xl border-t border-white/5 relative">
-        <FloatingNav activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
-      </div>
 
       {/* iOS 26 / VisionOS Widget Settings Modal Overlay */}
       {editingId && (

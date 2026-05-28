@@ -20,6 +20,68 @@
         "width": 300,
         "height": 180
       }
+    },
+    {
+      "id": "w_1780001882699",
+      "type": "news",
+      "position": {
+        "x": 1080,
+        "y": 240
+      },
+      "settings": {
+        "scale": 1,
+        "opacity": 0.4,
+        "blur": 24,
+        "radius": 32,
+        "borderWidth": 1,
+        "padding": 24,
+        "bgColorHex": "#000000",
+        "fontFamily": "inherit",
+        "color": "white",
+        "width": 300,
+        "height": 160
+      }
+    },
+    {
+      "id": "w_1780001910544",
+      "type": "crypto",
+      "position": {
+        "x": 840,
+        "y": 480
+      },
+      "settings": {
+        "scale": 1,
+        "opacity": 0.4,
+        "blur": 24,
+        "radius": 32,
+        "borderWidth": 1,
+        "padding": 24,
+        "bgColorHex": "#000000",
+        "fontFamily": "inherit",
+        "color": "white",
+        "coin": "solana",
+        "width": 240,
+        "height": 140
+      }
+    },
+    {
+      "id": "w_1780001953359",
+      "type": "ai",
+      "position": {
+        "x": 660,
+        "y": 300
+      },
+      "settings": {
+        "scale": 1,
+        "opacity": 0.4,
+        "blur": 24,
+        "radius": 32,
+        "borderWidth": 1,
+        "padding": 24,
+        "bgColorHex": "#000000",
+        "fontFamily": "inherit",
+        "color": "white"
+      }
     }
   ]
 }

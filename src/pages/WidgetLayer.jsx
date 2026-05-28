@@ -225,6 +225,10 @@ function DraggableWidget({ widget, children, updatePosition, isExposed, appConte
       onMouseEnter={() => window.electronAPI?.setIgnoreMouseEvents(false)}
       onMouseLeave={() => window.electronAPI?.setIgnoreMouseEvents(true)}
     >
+      {settings.animatedGradient && (
+         <div className="absolute inset-0 bg-animated-gradient opacity-40 mix-blend-color-dodge pointer-events-none z-[-1]" 
+              style={{ backgroundImage: 'linear-gradient(45deg, #ff00cc, #333399, #00ffcc, #ff9900)' }} />
+      )}
       <div className="absolute top-0 left-0 w-full h-8 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center -translate-y-4">
          <div className="w-12 h-1.5 bg-white/40 rounded-full mt-5 pointer-events-none"></div>
       </div>

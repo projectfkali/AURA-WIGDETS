@@ -10,7 +10,7 @@ export default function AiWidget({ settings }) {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
   }, [messages, isTyping])
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault()
     if (!input.trim()) return
 
@@ -19,17 +19,43 @@ export default function AiWidget({ settings }) {
     setInput('')
     setIsTyping(true)
 
-    // Simulate AI response
-    setTimeout(() => {
-      setIsTyping(false)
-      let aiResponse = "Anladım. Şu an test modundayım, o yüzden size tam bir cevap veremiyorum. (API entegrasyonu bekleniyor)"
-      if (userText.toLowerCase().includes('saat')) {
-        aiResponse = "Şu an saat: " + new Date().toLocaleTimeString()
-      } else if (userText.toLowerCase().includes('hava')) {
-        aiResponse = "Bugün hava oldukça güzel görünüyor, ancak dışarı çıkmadan önce bir hava durumu widget'ı ekleyebilirsiniz!"
+    if (settings.aiApiKey && settings.aiApiKey.startsWith('sk-')) {
+      try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${settings.aiApiKey}`
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "system", content: "You are Aura AI, a helpful desktop assistant." }, ...messages, { role: "user", content: userText }]
+          })
+        });
+        const data = await response.json();
+        setIsTyping(false);
+        if (data.choices && data.choices.length > 0) {
+           setMessages(prev => [...prev, { role: 'ai', text: data.choices[0].message.content }]);
+        } else {
+           setMessages(prev => [...prev, { role: 'ai', text: 'API Hatası: ' + (data.error?.message || 'Bilinmeyen hata') }]);
+        }
+      } catch (err) {
+        setIsTyping(false);
+        setMessages(prev => [...prev, { role: 'ai', text: 'Bağlantı Hatası: Lütfen API anahtarınızı veya internet bağlantınızı kontrol edin.' }]);
       }
-      setMessages(prev => [...prev, { role: 'ai', text: aiResponse }])
-    }, 1500)
+    } else {
+      // Simulate AI response (No API Key)
+      setTimeout(() => {
+        setIsTyping(false)
+        let aiResponse = "Anladım. Şu an simülasyon modundayım çünkü Ayarlar'dan (Veri & API) bir OpenAI API anahtarı girmediniz. Gerçek bir asistanla konuşmak için anahtarınızı ekleyin!"
+        if (userText.toLowerCase().includes('saat')) {
+          aiResponse = "Şu an saat: " + new Date().toLocaleTimeString()
+        } else if (userText.toLowerCase().includes('hava')) {
+          aiResponse = "Bugün hava oldukça güzel görünüyor, ancak dışarı çıkmadan önce bir hava durumu widget'ı ekleyebilirsiniz!"
+        }
+        setMessages(prev => [...prev, { role: 'ai', text: aiResponse }])
+      }, 1500)
+    }
   }
 
   return (
