@@ -297,8 +297,7 @@ export default function Dashboard() {
   )
 
   return (
-    <div className="flex h-screen overflow-hidden text-white font-sans bg-[#0a0a0a] selection:bg-white/30 relative">
-      <FloatingNav activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+    <div className="flex flex-col h-screen overflow-hidden text-white font-sans bg-[#0a0a0a] selection:bg-white/30 relative">
       
       {/* Mesh Gradient Arkaplan */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -307,7 +306,8 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 md:p-10 max-w-6xl overflow-y-auto z-10 mx-auto w-full pt-10 pb-[300px] custom-scrollbar">
+      <main className="flex-1 overflow-y-auto z-10 w-full custom-scrollbar">
+        <div className="p-6 md:p-10 max-w-6xl mx-auto w-full pt-10 pb-10">
         
         {activeMenu === 'gallery' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 mt-6">
@@ -559,7 +559,13 @@ export default function Dashboard() {
           </div>
         )}
 
+        </div>
       </main>
+
+      {/* Strict Bottom Dock Area (Asla taşmaz) */}
+      <div className="shrink-0 w-full flex justify-center py-6 z-50 bg-black/20 backdrop-blur-xl border-t border-white/5 relative">
+        <FloatingNav activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+      </div>
 
       {/* iOS 26 / VisionOS Widget Settings Modal Overlay */}
       {editingId && (

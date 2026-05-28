@@ -1,98 +1,11 @@
 {
   "widgets": [
     {
-      "id": "w_1779998010618",
-      "type": "weather",
-      "position": {
-        "x": 1240,
-        "y": 340
-      },
-      "settings": {
-        "scale": 1,
-        "opacity": 0.8,
-        "blur": 10,
-        "radius": 16,
-        "borderWidth": 1,
-        "padding": 10,
-        "bgColorHex": "#411010",
-        "fontFamily": "inherit",
-        "color": "white",
-        "width": 260,
-        "height": 160,
-        "lat": "39.9208",
-        "lon": "32.8541",
-        "cityName": "Ankara",
-        "isTransparent": false
-      }
-    },
-    {
-      "id": "w_1779998138689",
-      "type": "crypto",
+      "id": "w_1780001463106",
+      "type": "sysmon",
       "position": {
         "x": 1200,
-        "y": 40
-      },
-      "settings": {
-        "scale": 1.3,
-        "opacity": 0.6,
-        "blur": 10,
-        "radius": 16,
-        "borderWidth": 1,
-        "padding": 20,
-        "bgColorHex": "#000000",
-        "fontFamily": "inherit",
-        "color": "white",
-        "coin": "solana",
-        "width": 240,
-        "height": 180
-      }
-    },
-    {
-      "id": "w_1780000631406",
-      "type": "github",
-      "position": {
-        "x": 360,
-        "y": 80
-      },
-      "settings": {
-        "scale": 1,
-        "opacity": 0.4,
-        "blur": 24,
-        "radius": 32,
-        "borderWidth": 1,
-        "padding": 24,
-        "bgColorHex": "#000000",
-        "fontFamily": "inherit",
-        "color": "white",
-        "width": 320,
-        "height": 140
-      }
-    },
-    {
-      "id": "w_1780000819269",
-      "type": "notes",
-      "position": {
-        "x": 660,
-        "y": 300
-      },
-      "settings": {
-        "scale": 1,
-        "opacity": 0.4,
-        "blur": 24,
-        "radius": 32,
-        "borderWidth": 1,
-        "padding": 24,
-        "bgColorHex": "#000000",
-        "fontFamily": "inherit",
-        "color": "white"
-      }
-    },
-    {
-      "id": "w_1780000821444",
-      "type": "news",
-      "position": {
-        "x": 900,
-        "y": 120
+        "y": 20
       },
       "settings": {
         "scale": 1,
@@ -105,26 +18,7 @@
         "fontFamily": "inherit",
         "color": "white",
         "width": 300,
-        "height": 160
-      }
-    },
-    {
-      "id": "w_1780000822951",
-      "type": "ai",
-      "position": {
-        "x": 240,
-        "y": 280
-      },
-      "settings": {
-        "scale": 1,
-        "opacity": 0.4,
-        "blur": 24,
-        "radius": 32,
-        "borderWidth": 1,
-        "padding": 24,
-        "bgColorHex": "#000000",
-        "fontFamily": "inherit",
-        "color": "white"
+        "height": 180
       }
     }
   ]

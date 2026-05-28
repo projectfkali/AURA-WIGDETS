@@ -10,8 +10,8 @@ export default function FloatingNav({ activeMenu, setActiveMenu }) {
   ]
 
   return (
-    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50">
-      <div className="bg-white/10 backdrop-blur-3xl border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] rounded-[32px] p-2 flex items-center gap-1 mx-auto">
+    <div className="relative z-50 w-full max-w-2xl mx-auto flex justify-center">
+      <div className="bg-white/10 backdrop-blur-3xl border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] rounded-[32px] p-2 flex items-center gap-1">
         {menuItems.map(item => (
           <button
             key={item.id}
