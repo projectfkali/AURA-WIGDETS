@@ -50,7 +50,7 @@
       "id": "w_1779998138689",
       "type": "crypto",
       "position": {
-        "x": 1200,
+        "x": 1220,
         "y": 0
       },
       "settings": {
@@ -66,6 +66,26 @@
         "coin": "solana",
         "width": 240,
         "height": 140
+      }
+    },
+    {
+      "id": "w_1779999396185",
+      "type": "hardware",
+      "position": {
+        "x": 600,
+        "y": 120
+      },
+      "settings": {
+        "scale": 1.6,
+        "opacity": 0.4,
+        "blur": 22,
+        "radius": 40,
+        "borderWidth": 1,
+        "padding": 24,
+        "bgColorHex": "#000000",
+        "fontFamily": "inherit",
+        "color": "white",
+        "height": 420
       }
     }
   ]
